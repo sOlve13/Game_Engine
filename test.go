@@ -1,19 +1,30 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+)
+
+type Game struct{}
+
+func (g *Game) Update() error {
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, "Hello, World!")
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 320, 240
+}
 
 func main() {
-	fmt.Println("Hello world")
-	var testing = [2]string{"Hello", "world"}
-	fmt.Println(testing[0] + " " + testing[1])
-
-	if 1 > 0 {
-		fmt.Println("Hello")
-	} else {
-		fmt.Println("World")
-	}
-
-	for i := 0; i < 10; i += 2 {
-		fmt.Println(i)
+	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowTitle("Hello, World!")
+	if err := ebiten.RunGame(&Game{}); err != nil {
+		log.Fatal(err)
 	}
 }

@@ -36,6 +36,15 @@ func NewGame() *Game {
 	}
 }
 
+func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
+	if R < 0 || R > 255 || G < 0 || G > 255 || B < 0 || B > 255 || A < 0 || A > 255 {
+		logError(fmt.Errorf("Colors Cust Be In Diapasone Of 0 To 255"))
+	}
+
+	g.backgroundColor = color.RGBA{uint8(R), uint8(G), uint8(B), uint8(A)}
+
+}
+
 func (g *Game) Update() error {
 	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	screenWidth, screenHeight := ebiten.WindowSize()
@@ -64,13 +73,13 @@ func (g *Game) Update() error {
 			fmt.Println("Button Test")
 			switch g.backgroundColor {
 			case color.Black:
-				g.backgroundColor = color.RGBA{70, 70, 70, 100}
+				g.setBackgroundColor(70, 70, 70, 100)
 			case color.RGBA{70, 70, 70, 100}:
-				g.backgroundColor = color.RGBA{255, 255, 255, 255}
+				g.setBackgroundColor(255, 255, 255, 255)
 			case color.RGBA{255, 255, 255, 255}:
-				g.backgroundColor = color.RGBA{255, 0, 132, 100}
+				g.setBackgroundColor(255, 0, 132, 100)
 			case color.RGBA{255, 0, 132, 100}:
-				g.backgroundColor = color.RGBA{4, 0, 255, 100}
+				g.setBackgroundColor(4, 0, 255, 100)
 			default:
 				g.backgroundColor = color.Black
 			}
@@ -92,7 +101,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(g.buttonImage, op)
 	ebiten.SetWindowTitle("Game Engine")
-	ebiten.SetTPS(1)
 
 }
 

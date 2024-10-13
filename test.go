@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image/color"
 	"log"
@@ -91,6 +92,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(g.buttonImage, op)
 	ebiten.SetWindowTitle("Game Engine")
+	ebiten.SetTPS(1)
+
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -102,6 +105,8 @@ func logError(err error) {
 }
 
 func main() {
+	tps := flag.Int("tps", 60, "Number of ticks per second (TPS)")
+	flag.Parse()
 	game := NewGame()
 
 	width, height := -800, 600
@@ -110,7 +115,7 @@ func main() {
 	} else {
 		ebiten.SetWindowSize(width, height)
 	}
-
+	ebiten.SetTPS(*tps)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	if err := ebiten.RunGame(game); err != nil {
 		logError(err)

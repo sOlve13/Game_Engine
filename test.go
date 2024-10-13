@@ -17,7 +17,7 @@ type Game struct {
 func NewGame() *Game {
 	// Create a button image
 	buttonImage := ebiten.NewImage(200, 100)
-	buttonImage.Fill(color.RGBA{0, 128, 0, 255})
+	buttonImage.Fill(color.RGBA{220, 220, 220, 255})
 	return &Game{buttonImage: buttonImage,
 		backgroundColor: color.Black,
 		IsPressed:       false,
@@ -25,7 +25,7 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
-	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) // If Pressed == True, Not Pressed == False
 	screenWidth, screenHeight := ebiten.WindowSize()
 
 	buttonWidth := g.buttonImage.Bounds().Dx()
@@ -39,15 +39,22 @@ func (g *Game) Update() error {
 	buttonTop := Y - buttonHeight/2
 	buttonBottom := Y + buttonHeight/2
 
+	/*
+		True  || False = True
+		True  || True  = False
+		False || True  = False
+		False || False = False
+	*/
 	if IsCurPressed && !g.IsPressed {
 		x, y := ebiten.CursorPosition()
 		// Check if the mouse is within the button's area
 		if x >= buttonLeft && x <= buttonRight && y >= buttonTop && y <= buttonBottom {
+			g.buttonImage.Fill(color.RGBA{128, 128, 128, 255})
 			fmt.Println("Button Test")
 			switch g.backgroundColor {
 			case color.Black:
-				g.backgroundColor = color.RGBA{100, 100, 100, 100}
-			case color.RGBA{100, 100, 100, 100}:
+				g.backgroundColor = color.RGBA{70, 70, 70, 100}
+			case color.RGBA{70, 70, 70, 100}:
 				g.backgroundColor = color.RGBA{255, 255, 255, 255}
 			case color.RGBA{255, 255, 255, 255}:
 				g.backgroundColor = color.RGBA{255, 0, 132, 100}
@@ -59,7 +66,10 @@ func (g *Game) Update() error {
 
 		}
 	}
-	g.IsPressed = IsCurPressed
+	if !IsCurPressed && g.IsPressed {
+		g.buttonImage.Fill(color.RGBA{220, 220, 220, 255})
+	}
+	g.IsPressed = IsCurPressed // if True, changes to True and if False, change to False. Each iteration
 	return nil
 }
 

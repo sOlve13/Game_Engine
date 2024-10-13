@@ -38,7 +38,7 @@ func NewGame() *Game {
 
 func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 	if R < 0 || R > 255 || G < 0 || G > 255 || B < 0 || B > 255 || A < 0 || A > 255 {
-		logError(fmt.Errorf("Colors Cust Be In Diapasone Of 0 To 255"))
+		logError(fmt.Errorf("Colors Must Be In Diapasone Of 0 To 255"))
 	}
 
 	g.backgroundColor = color.RGBA{uint8(R), uint8(G), uint8(B), uint8(A)}

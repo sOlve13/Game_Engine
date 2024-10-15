@@ -94,8 +94,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(g.buttonImage, op)
 	ebiten.SetWindowTitle("Game Engine")
 
-	col := color.RGBA{150, 100, 200, 255}
-	g.Segment(screen, 200, 100, 300, 50, col) // Call the segment drawing function
+	col := color.RGBA{150, 100, 200, 255}     // Setting the color of segment/square
+	g.Segment(screen, 200, 100, 200, 50, col) // Call the segment drawing function
+
+	g.drawsquare(screen, 50, 200, 100, col) // Call the square drawing function
+	g.drawsquare(screen, 650, 200, 100, col)
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -104,6 +107,19 @@ func (g *Game) Layout(int, int) (int, int) {
 
 func logError(err error) {
 	errorLogger.Println(err)
+}
+
+func (g *Game) drawsquare(screen *ebiten.Image, X int, Y int, S int, col color.Color) error {
+	if X <= 0 && Y <= 0 && S < 1 {
+		logError(fmt.Errorf("Square should be on the screen and not smaller than 1 px"))
+		return nil
+	}
+	g.Segment(screen, X, Y, X+S, Y, col)
+	g.Segment(screen, X, Y, X, Y+S, col)
+	g.Segment(screen, X+S, Y, X+S, Y+S, col)
+	g.Segment(screen, X, Y+S, X+S, Y+S, col)
+
+	return nil
 }
 
 func (g *Game) Segment(screen *ebiten.Image, startX int, startY int, finalX int, finalY int, col color.Color) error {
@@ -115,24 +131,33 @@ func (g *Game) Segment(screen *ebiten.Image, startX int, startY int, finalX int,
 		return nil // No line to draw
 	}
 
-	var m float64
-	if deltX != 0 {
-		m = float64(deltY) / float64(deltX) // Calculate slope
-	} else {
-		m = 1.0 // Handle vertical lines
+	if deltX == 0 { // Vertical line case
+		step := 1
+		if deltY < 0 {
+			step = -1
+		}
+		for y := startY; y != finalY+step; y += step {
+			g.plotPixel(screen, startX, y, col)
+		}
+		return nil
 	}
 
-	if absolute(m) <= 1 { // Case where |m| <= 1
+	var slope float64
+	if deltX != 0 {
+		slope = float64(deltY) / float64(deltX) // Calculate slope
+	}
+
+	if absolute(slope) <= 1 { // Case where |slope| <= 1
 		y := float64(startY)
 		step := 1
 		if deltX < 0 {
 			step = -1
 		}
 		for x := startX; x != finalX+step; x += step {
-			g.plotPixel(screen, x, int(y), col) // Plot at rounded (x, y)
-			y += m                              // Increment y
+			g.plotPixel(screen, x, int(y), col)
+			y += slope // Increment y
 		}
-	} else { // Case where |m| > 1, swap roles of x and y
+	} else { // Case where |slope| > 1, swap roles of x and y
 		x := float64(startX)
 		step := 1
 		if deltY < 0 {
@@ -140,7 +165,7 @@ func (g *Game) Segment(screen *ebiten.Image, startX int, startY int, finalX int,
 		}
 		for y := startY; y != finalY+step; y += step {
 			g.plotPixel(screen, int(x), y, col) // Plot at rounded (x, y)
-			x += 1 / m                          // Increment x
+			x += 1 / slope                      // Increment x
 		}
 	}
 

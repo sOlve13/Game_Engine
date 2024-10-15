@@ -38,11 +38,9 @@ func NewGame() *Game {
 
 func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 	if R < 0 || R > 255 || G < 0 || G > 255 || B < 0 || B > 255 || A < 0 || A > 255 {
-		logError(fmt.Errorf("Colors Must Be In Diapasone Of 0 To 255"))
+		logError(fmt.Errorf("Colors must be in the range of 0 to 255"))
 	}
-
 	g.backgroundColor = color.RGBA{uint8(R), uint8(G), uint8(B), uint8(A)}
-
 }
 
 func (g *Game) Update() error {
@@ -60,12 +58,6 @@ func (g *Game) Update() error {
 	buttonTop := Y - buttonHeight/2
 	buttonBottom := Y + buttonHeight/2
 
-	/*
-	  True  || False = True
-	  True  || True  = False
-	  False || True  = False
-	  False || False = False
-	*/
 	if IsCurPressed && !g.IsPressed {
 		x, y := ebiten.CursorPosition()
 		if x >= buttonLeft && x <= buttonRight && y >= buttonTop && y <= buttonBottom {
@@ -85,7 +77,7 @@ func (g *Game) Update() error {
 			}
 		}
 	}
-	if !IsCurPressed && g.IsPressed { // if True, changes to True and if False, change to False. Each iteration
+	if !IsCurPressed && g.IsPressed {
 		g.buttonImage.Fill(color.RGBA{220, 220, 220, 255})
 	}
 	g.IsPressed = IsCurPressed
@@ -102,6 +94,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(g.buttonImage, op)
 	ebiten.SetWindowTitle("Game Engine")
 
+	col := color.RGBA{150, 100, 200, 255}
+	g.Segment(screen, 200, 100, 300, 50, col) // Call the segment drawing function
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -112,12 +106,66 @@ func logError(err error) {
 	errorLogger.Println(err)
 }
 
+func (g *Game) Segment(screen *ebiten.Image, startX int, startY int, finalX int, finalY int, col color.Color) error {
+	deltX := finalX - startX
+	deltY := finalY - startY
+
+	if deltX == 0 && deltY == 0 {
+		logError(fmt.Errorf("Line can't be 0"))
+		return nil // No line to draw
+	}
+
+	var m float64
+	if deltX != 0 {
+		m = float64(deltY) / float64(deltX) // Calculate slope
+	} else {
+		m = 1.0 // Handle vertical lines
+	}
+
+	if absolute(m) <= 1 { // Case where |m| <= 1
+		y := float64(startY)
+		step := 1
+		if deltX < 0 {
+			step = -1
+		}
+		for x := startX; x != finalX+step; x += step {
+			g.plotPixel(screen, x, int(y), col) // Plot at rounded (x, y)
+			y += m                              // Increment y
+		}
+	} else { // Case where |m| > 1, swap roles of x and y
+		x := float64(startX)
+		step := 1
+		if deltY < 0 {
+			step = -1
+		}
+		for y := startY; y != finalY+step; y += step {
+			g.plotPixel(screen, int(x), y, col) // Plot at rounded (x, y)
+			x += 1 / m                          // Increment x
+		}
+	}
+
+	return nil
+}
+
+func (g *Game) plotPixel(screen *ebiten.Image, x int, y int, col color.Color) {
+	// Draw a pixel by setting it on the screen image
+	screen.Set(x, y, col)
+
+}
+
+func absolute(num float64) float64 {
+	if num < 0 {
+		return -num
+	}
+	return num
+}
+
 func main() {
 	tps := flag.Int("tps", 60, "Number of ticks per second (TPS)")
 	flag.Parse()
 	game := NewGame()
 
-	width, height := -800, 600
+	width, height := 800, 600
 	if width <= 0 || height <= 0 {
 		logError(fmt.Errorf("invalid window size: %d x %d", width, height))
 	} else {

@@ -18,6 +18,7 @@ type PrimitiveRendererСlass interface {
 	plotPixel(int, int, color.Color)
 	segment(int, int, int, int, color.Color) error
 	DrawSquare(int, int, int, color.Color) error
+	DrawPolyline([]Point2D, color.Color)
 }
 
 type primitiveRendererСlass struct {
@@ -30,6 +31,7 @@ type primitiveRendererСlass struct {
 	col             color.Color
 	primitiveType   string
 	backgroundColor color.Color
+	lines           []LineSegment
 }
 
 func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color) PrimitiveRendererСlass {
@@ -41,6 +43,7 @@ func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color
 		col:             nil, // Нулевое значение для интерфейса color.Color
 		primitiveType:   "",
 		backgroundColor: backgroundColor,
+		lines:           make([]LineSegment, 0),
 	}
 }
 func (primitive *primitiveRendererСlass) plotPixel(x int, y int, col color.Color) {
@@ -117,4 +120,20 @@ func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, col co
 	primitive.primitiveType = "square"
 
 	return nil
+}
+
+func (pr *primitiveRendererСlass) DrawPolyline(points []Point2D, lineColor color.Color) {
+	if len(points) < 2 {
+		return // Need at least two points to draw a polyline
+	}
+
+	for i := 0; i < len(points)-1; i++ {
+		startPoint := points[i]
+		endPoint := points[i+1]
+		line := NewLineSegment(pr.screen, color.Transparent) // Use transparent as background
+		line.Segment(startPoint, endPoint, lineColor)
+		pr.lines = append(pr.lines, line)
+	}
+	pr.col = lineColor
+
 }

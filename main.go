@@ -111,6 +111,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	testSquare1.DrawSquare(50, 200, 200, col)
 	testSquare2.DrawSquare(650, 200, 100, col)
 
+	testPolyline := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	points := []objects.Point2D{
+		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 600, 300, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
+	}
+	testPolyline.DrawPolyline(points, col)
 }
 
 func (g *Game) Layout(int, int) (int, int) {

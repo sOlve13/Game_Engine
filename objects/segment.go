@@ -5,52 +5,42 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-func absolute(num float64) float64 {
-	if num < 0 {
-		return -num
-	}
-	return num
+type LineSegment interface {
+	Segment(Point2D, Point2D, color.Color) error
+	SegmentDedault(Point2D, Point2D, color.Color)
 }
 
-type PrimitiveRendererСlass interface {
-	plotPixel(int, int, color.Color)
-	segment(int, int, int, int, color.Color) error
-	DrawSquare(int, int, int, color.Color) error
-}
-
-type primitiveRendererСlass struct {
+type lineSegment struct {
 	screen          *ebiten.Image
-	startX          int
-	startY          int
-	finalSegX       int
-	finalSegY       int
-	S               int
+	startPoint      Point2D
+	finalPoint      Point2D
 	col             color.Color
-	primitiveType   string
 	backgroundColor color.Color
 }
 
-func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color) PrimitiveRendererСlass {
-	return &primitiveRendererСlass{
+func NewLineSegment(screen *ebiten.Image, backgroundColor color.Color) LineSegment {
+	return &lineSegment{
 		screen:          screen,
-		startX:          0,
-		startY:          0,
-		S:               0,
+		startPoint:      nil,
+		finalPoint:      nil,
 		col:             nil, // Нулевое значение для интерфейса color.Color
-		primitiveType:   "",
 		backgroundColor: backgroundColor,
 	}
 }
-func (primitive *primitiveRendererСlass) plotPixel(x int, y int, col color.Color) {
-
+func (primitive *lineSegment) plotPixel(x int, y int, col color.Color) {
 	primitive.screen.Set(x, y, col)
+
 }
 
-func (primitive *primitiveRendererСlass) segment(startX int, startY int, finalX int, finalY int, col color.Color) error {
+func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, col color.Color) error {
 	var err error
-
+	startX, startY := startPoint.GetCoords()
+	finalX, finalY := finalPoint.GetCoords()
+	primitive.startPoint = startPoint
+	primitive.finalPoint = finalPoint
 	deltX := finalX - startX
 	deltY := finalY - startY
 	if deltX == 0 && deltY == 0 {
@@ -98,23 +88,14 @@ func (primitive *primitiveRendererСlass) segment(startX int, startY int, finalX
 
 	return nil
 }
-
-func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, col color.Color) error {
-	var err error
-	if X <= 0 && Y <= 0 && S < 1 {
-		err = fmt.Errorf("Square should be on the screen and not smaller than 1 px")
-		return err
-	}
-
-	primitive.segment(X, Y, X+S, Y, col)
-	primitive.segment(X, Y, X, Y+S, col)
-	primitive.segment(X+S, Y, X+S, Y+S, col)
-	primitive.segment(X, Y+S, X+S, Y+S, col)
-
-	primitive.startX = X
-	primitive.startY = Y
-	primitive.S = S
-	primitive.primitiveType = "square"
-
-	return nil
+func (primitive *lineSegment) SegmentDedault(startPoint Point2D, finalPoint Point2D, col color.Color) {
+	primitive.startPoint = startPoint
+	primitive.finalPoint = finalPoint
+	x1, y1 := startPoint.GetCoords()
+	x2, y2 := finalPoint.GetCoords()
+	x1_ := float32(x1)
+	x2_ := float32(x2)
+	y1_ := float32(y1)
+	y2_ := float32(y2)
+	vector.StrokeLine(primitive.screen, x1_, y1_, x2_, y2_, 1, col, false)
 }

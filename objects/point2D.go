@@ -7,7 +7,8 @@ import (
 )
 
 type Point2D interface {
-	PlotPixel(int, int, color.Color)
+	GetCoords() (int, int)
+	ChangeCoords(int, int)
 }
 
 type point2D struct {
@@ -18,19 +19,15 @@ type point2D struct {
 	backgroundColor color.Color
 }
 
-func NewPoint2D(screen *ebiten.Image, backfroundCol color.Color) Point2D {
+func NewPoint2D(screen *ebiten.Image, backfroundCol color.Color, x, y int, col color.Color) Point2D {
+	screen.Set(x, y, col)
 	return &point2D{
 		screen:          screen,
-		X:               0,
-		Y:               0,
+		X:               x,
+		Y:               y,
 		col:             nil, // Нулевое значение для интерфейса color.Color
 		backgroundColor: backfroundCol,
 	}
-}
-
-func (primitive *point2D) PlotPixel(x int, y int, col color.Color) {
-	primitive.screen.Set(x, y, col)
-
 }
 
 func (primitive *point2D) GetCoords() (int, int) {

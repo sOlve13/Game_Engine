@@ -97,11 +97,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebiten.SetWindowTitle("Game Engine")
 
 	col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
-	testSegment := objects.NewPrimitiveRendererclass(screen)
+	testSegment := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 	testSegment.Segment(200, 100, 200, 50, col)
 
-	testSquare1 := objects.NewPrimitiveRendererclass(screen)
-	testSquare2 := objects.NewPrimitiveRendererclass(screen)
+	testSquare1 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	testSquare2 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 	testSquare1.DrawSquare(50, 200, 200, col)
 	testSquare2.DrawSquare(650, 200, 100, col)
 

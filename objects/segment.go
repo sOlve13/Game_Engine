@@ -11,6 +11,10 @@ import (
 type LineSegment interface {
 	Segment(Point2D, Point2D, color.Color) error
 	SegmentDedault(Point2D, Point2D, color.Color)
+	ChangeFinal(Point2D)
+	ChangeStart(Point2D)
+	GetFinal() (int, int)
+	GetStart() (int, int)
 }
 
 type lineSegment struct {
@@ -39,6 +43,7 @@ func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, co
 	var err error
 	startX, startY := startPoint.GetCoords()
 	finalX, finalY := finalPoint.GetCoords()
+	primitive.col = col
 	primitive.startPoint = startPoint
 	primitive.finalPoint = finalPoint
 	deltX := finalX - startX
@@ -93,9 +98,30 @@ func (primitive *lineSegment) SegmentDedault(startPoint Point2D, finalPoint Poin
 	primitive.finalPoint = finalPoint
 	x1, y1 := startPoint.GetCoords()
 	x2, y2 := finalPoint.GetCoords()
+	primitive.col = col
 	x1_ := float32(x1)
 	x2_ := float32(x2)
 	y1_ := float32(y1)
 	y2_ := float32(y2)
 	vector.StrokeLine(primitive.screen, x1_, y1_, x2_, y2_, 1, col, false)
+}
+
+func (primitive *lineSegment) ChangeStart(newPoint Point2D) {
+	color := primitive.col
+	primitive.Segment(primitive.startPoint, primitive.finalPoint, primitive.backgroundColor)
+	primitive.Segment(newPoint, primitive.finalPoint, color)
+}
+
+func (primitive *lineSegment) ChangeFinal(newPoint Point2D) {
+	color := primitive.col
+	primitive.Segment(primitive.startPoint, primitive.finalPoint, primitive.backgroundColor)
+	primitive.Segment(primitive.startPoint, newPoint, color)
+}
+
+func (primitive *lineSegment) GetFinal() (int, int) {
+	return primitive.finalPoint.GetCoords()
+}
+
+func (primitive *lineSegment) GetStart() (int, int) {
+	return primitive.startPoint.GetCoords()
 }

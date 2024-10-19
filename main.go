@@ -100,9 +100,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	testSegment := objects.NewLineSegment(screen, g.backgroundColor)
 	testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, col), col)
+	testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col))
 
 	testSegmentDefault := objects.NewLineSegment(screen, g.backgroundColor)
-	testSegmentDefault.SegmentDedault(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
+	testSegmentDefault.Segment(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
+	testSegmentDefault.ChangeFinal(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col))
 
 	testSquare1 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 	testSquare2 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)

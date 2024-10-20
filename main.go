@@ -26,15 +26,30 @@ type Game struct {
 	buttonImage     *ebiten.Image
 	backgroundColor color.Color
 	IsPressed       bool
+	buffer          [3]*ebiten.Image
+	curBuffer       int
 }
 
-func NewGame() *Game {
+func NewGame(screenWidth, screenHeight int) *Game {
 	buttonImage := ebiten.NewImage(200, 100)
 	buttonImage.Fill(color.RGBA{220, 220, 220, 255})
+	buffer := [3]*ebiten.Image{
+		ebiten.NewImage(screenWidth, screenHeight),
+		ebiten.NewImage(screenWidth, screenHeight),
+		ebiten.NewImage(screenWidth, screenHeight),
+	}
 	return &Game{
 		buttonImage:     buttonImage,
 		backgroundColor: color.Black,
 		IsPressed:       false,
+		buffer:          buffer,
+		curBuffer:       0,
+	}
+}
+func (g *Game) resizeBuffer() {
+	screenWidth, screenHeight := ebiten.WindowSize()
+	for i := 0; i < 3; i++ {
+		g.buffer[i] = ebiten.NewImage(screenWidth, screenHeight)
 	}
 }
 
@@ -48,6 +63,10 @@ func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 func (g *Game) Update() error {
 	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	screenWidth, screenHeight := ebiten.WindowSize()
+
+	if screenWidth != g.buffer[0].Bounds().Dx() && screenHeight != g.buffer[0].Bounds().Dy() {
+		g.resizeBuffer()
+	}
 
 	buttonWidth := g.buttonImage.Bounds().Dx()
 	buttonHeight := g.buttonImage.Bounds().Dy()
@@ -88,36 +107,42 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screenWidth, screenHeight := ebiten.WindowSize()
-	screen.Fill(g.backgroundColor)
+	currentBuffer := g.buffer[g.curBuffer]
+	currentBuffer.Clear()
+	currentBuffer.Fill(g.backgroundColor)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
 
-	screen.DrawImage(g.buttonImage, op)
+	currentBuffer.DrawImage(g.buttonImage, op)
 	ebiten.SetWindowTitle("Game Engine")
 
 	col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 
-	testSegment := objects.NewLineSegment(screen, g.backgroundColor)
-	testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, col), col)
-	testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col))
+	testSegment := objects.NewLineSegment(currentBuffer, g.backgroundColor)
+	testSegment.Segment(objects.NewPoint2D(currentBuffer, g.backgroundColor, 200, 100, col), objects.NewPoint2D(currentBuffer, g.backgroundColor, 200, 300, col), col)
+	testSegment.ChangeStart(objects.NewPoint2D(currentBuffer, g.backgroundColor, 300, 100, col))
 
-	testSegmentDefault := objects.NewLineSegment(screen, g.backgroundColor)
-	testSegmentDefault.Segment(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
-	testSegmentDefault.ChangeFinal(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col))
+	testSegmentDefault := objects.NewLineSegment(currentBuffer, g.backgroundColor)
+	testSegmentDefault.Segment(objects.NewPoint2D(currentBuffer, g.backgroundColor, 300, 100, col), objects.NewPoint2D(currentBuffer, g.backgroundColor, 300, 300, col), col)
+	testSegmentDefault.ChangeFinal(objects.NewPoint2D(currentBuffer, g.backgroundColor, 200, 100, col))
 
-	testSquare1 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testSquare2 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	testSquare1 := objects.NewPrimitiveRendererclass(currentBuffer, g.backgroundColor)
+	testSquare2 := objects.NewPrimitiveRendererclass(currentBuffer, g.backgroundColor)
 	testSquare1.DrawSquare(50, 200, 200, col)
 	testSquare2.DrawSquare(650, 200, 100, col)
 
-	testPolyline := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	testPolyline := objects.NewPrimitiveRendererclass(currentBuffer, g.backgroundColor)
 	points := []objects.Point2D{
-		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 600, 300, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
+		objects.NewPoint2D(currentBuffer, g.backgroundColor, 500, 200, col),
+		objects.NewPoint2D(currentBuffer, g.backgroundColor, 600, 300, col),
+		objects.NewPoint2D(currentBuffer, g.backgroundColor, 700, 200, col),
 	}
 	testPolyline.DrawPolyline(points, col)
+	screen.DrawImage(currentBuffer, nil)
+
+	g.curBuffer = (g.curBuffer + 1) % 3
+
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -131,9 +156,8 @@ func logError(err error) {
 func main() {
 	tps := flag.Int("tps", 60, "Number of ticks per second (TPS)")
 	flag.Parse()
-	game := NewGame()
-
 	width, height := 800, 600
+	game := NewGame(800, 600)
 	if width <= 0 || height <= 0 {
 		logError(fmt.Errorf("invalid window size: %d x %d", width, height))
 	} else {

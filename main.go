@@ -106,16 +106,15 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	ebiten.SetWindowTitle("Game Engine")
 	screenWidth, screenHeight := ebiten.WindowSize()
 	currentBuffer := g.buffer[g.curBuffer]
 	currentBuffer.Clear()
 	currentBuffer.Fill(g.backgroundColor)
-
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
 
 	currentBuffer.DrawImage(g.buttonImage, op)
-	ebiten.SetWindowTitle("Game Engine")
 
 	col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 
@@ -131,7 +130,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	testSquare2 := objects.NewPrimitiveRendererclass(currentBuffer, g.backgroundColor)
 	testSquare1.DrawSquare(50, 200, 200, col)
 	testSquare2.DrawSquare(650, 200, 100, col)
-
 	testPolyline := objects.NewPrimitiveRendererclass(currentBuffer, g.backgroundColor)
 	points := []objects.Point2D{
 		objects.NewPoint2D(currentBuffer, g.backgroundColor, 500, 200, col),
@@ -139,6 +137,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		objects.NewPoint2D(currentBuffer, g.backgroundColor, 700, 200, col),
 	}
 	testPolyline.DrawPolyline(points, col)
+	test_dot := objects.NewPoint2D(currentBuffer, g.backgroundColor, 500, 500, col)
+	test_dot.PlotPixel()
+	test_dot1 := objects.NewPoint2D(currentBuffer, g.backgroundColor, 501, 500, col)
+	test_dot1.PlotPixel()
+	test_dot2 := objects.NewPoint2D(currentBuffer, g.backgroundColor, 502, 500, col)
+	test_dot2.PlotPixel()
 	screen.DrawImage(currentBuffer, nil)
 
 	g.curBuffer = (g.curBuffer + 1) % 3

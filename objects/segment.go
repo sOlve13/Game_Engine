@@ -10,7 +10,7 @@ import (
 
 type LineSegment interface {
 	Segment(Point2D, Point2D, color.Color) error
-	SegmentDedault(Point2D, Point2D, color.Color)
+	SegmentDefault(Point2D, Point2D, color.Color)
 	ChangeFinal(Point2D)
 	ChangeStart(Point2D)
 	GetFinal() (int, int)
@@ -93,7 +93,7 @@ func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, co
 
 	return nil
 }
-func (primitive *lineSegment) SegmentDedault(startPoint Point2D, finalPoint Point2D, col color.Color) {
+func (primitive *lineSegment) SegmentDefault(startPoint Point2D, finalPoint Point2D, col color.Color) {
 	primitive.startPoint = startPoint
 	primitive.finalPoint = finalPoint
 	x1, y1 := startPoint.GetCoords()

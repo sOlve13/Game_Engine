@@ -22,14 +22,12 @@ type PrimitiveRendererСlass interface {
 }
 
 type primitiveRendererСlass struct {
-	screen          *ebiten.Image
-	startX          int
-	startY          int
-	finalSegX       int
-	finalSegY       int
+	screen *ebiten.Image
+	startX int
+	startY int
+
 	S               int
 	col             color.Color
-	primitiveType   string
 	backgroundColor color.Color
 	lines           []LineSegment
 }
@@ -41,7 +39,6 @@ func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color
 		startY:          0,
 		S:               0,
 		col:             nil, // Нулевое значение для интерфейса color.Color
-		primitiveType:   "",
 		backgroundColor: backgroundColor,
 		lines:           make([]LineSegment, 0),
 	}
@@ -117,7 +114,6 @@ func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, col co
 	primitive.startX = X
 	primitive.startY = Y
 	primitive.S = S
-	primitive.primitiveType = "square"
 
 	return nil
 }

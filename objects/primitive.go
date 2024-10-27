@@ -19,6 +19,12 @@ type PrimitiveRendererСlass interface {
 	segment(int, int, int, int, color.Color) error
 	DrawSquare(int, int, int, color.Color) error
 	DrawPolyline([]Point2D, color.Color)
+	DrawCircle(Point2D, int, color.Color)
+	FillSquare(int, int, int, color.Color)
+	DrawPolygon([]Point2D, color.Color) error
+	FloodFill(int, int, color.Color, color.Color)
+	BorderFill(int, int, color.Color, color.Color)
+	DrawEllipse(Point2D, int, int, color.Color)
 }
 
 type primitiveRendererСlass struct {
@@ -132,4 +138,162 @@ func (pr *primitiveRendererСlass) DrawPolyline(points []Point2D, lineColor colo
 	}
 	pr.col = lineColor
 
+}
+
+func (primitive *primitiveRendererСlass) DrawCircle(center Point2D, radius int, col color.Color) {
+	centerX, centerY := center.GetCoords()
+
+	x := 0
+	y := radius
+	decison := 1 - radius
+
+	plotSymmetricPoints := func(x, y int) {
+		primitive.plotPixel(centerX+x, centerY+y, col) // Octant 1
+		primitive.plotPixel(centerX-x, centerY+y, col) // Octant 2
+		primitive.plotPixel(centerX+x, centerY-y, col) // Octant 8
+		primitive.plotPixel(centerX-x, centerY-y, col) // Octant 7
+		primitive.plotPixel(centerX+y, centerY+x, col) // Octant 3
+		primitive.plotPixel(centerX-y, centerY+x, col) // Octant 4
+		primitive.plotPixel(centerX+y, centerY-x, col) // Octant 6
+		primitive.plotPixel(centerX-y, centerY-x, col) // Octant 5
+	}
+
+	plotSymmetricPoints(x, y)
+
+	for x < y {
+		// Update the decision parameter based on the current point
+		if decison < 0 {
+			// Move horizontally
+			decison += 2*x + 1 // Corrected from +3 to +1
+		} else {
+			// Move diagonally
+			decison += 2*(x-y) + 1
+			y-- // Decrease y when moving diagonally
+		}
+		x++
+
+		// Plot the symmetric points for the new (x, y)
+		plotSymmetricPoints(x, y)
+	}
+}
+
+func (primitive *primitiveRendererСlass) DrawEllipse(center Point2D, a int, b int, col color.Color) {
+	centerX, centerY := center.GetCoords()
+	x := 0
+	y := b
+	a2 := a * a
+	b2 := b * b
+	decision := b2 - (a2 * b) + (a2 / 4)
+
+	// Function to plot symmetric points
+	plotSymmetricPoints := func(x, y int) {
+		primitive.plotPixel(centerX+x, centerY+y, col) // Quadrant I
+		primitive.plotPixel(centerX-x, centerY+y, col) // Quadrant II
+		primitive.plotPixel(centerX+x, centerY-y, col) // Quadrant IV
+		primitive.plotPixel(centerX-x, centerY-y, col) // Quadrant III
+	}
+
+	// Draw the ellipse in the first half
+	plotSymmetricPoints(x, y)
+	for (b2 * x) <= (a2 * y) {
+		x++
+		if decision < 0 {
+			decision += b2 * (2*x + 1)
+		} else {
+			y--
+			decision += b2*(2*x+1) - 2*a2*y
+		}
+		plotSymmetricPoints(x, y)
+	}
+
+	// Now handle the lower half of the ellipse
+	x = a
+	y = 0
+	decision = a2 - (b2 * a) + (b2 / 4)
+
+	// Draw the ellipse in the second half
+	plotSymmetricPoints(x, y)
+	for (a2 * y) <= (b2 * x) {
+		y++
+		if decision < 0 {
+			decision += a2 * (2*y + 1)
+		} else {
+			x--
+			decision += a2*(2*y+1) - 2*b2*x
+		}
+		plotSymmetricPoints(x, y)
+	}
+}
+
+func (primitive *primitiveRendererСlass) DrawPolygon(points []Point2D, lineColor color.Color) error {
+	if len(points) < 3 {
+		return fmt.Errorf("Need at least three points to form a polygon")
+	}
+
+	for i := 0; i < len(points); i++ {
+		startPoint := points[i]
+		endPoint := points[(i+1)%len(points)]
+		startX, startY := startPoint.GetCoords()
+		endX, endY := endPoint.GetCoords()
+
+		primitive.segment(startX, startY, endX, endY, lineColor)
+	}
+	primitive.segment(350, 250, 500, 100, lineColor)
+
+	return nil
+}
+
+func (primitive *primitiveRendererСlass) FillSquare(x int, y int, s int, col color.Color) {
+	for i := x; i <= x+s; i++ {
+		for j := y; j <= y+s; j++ {
+			primitive.plotPixel(i, j, col)
+		}
+	}
+}
+
+func (primitive *primitiveRendererСlass) BorderFill(x int, y int, fillColor color.Color, borderColor color.Color) {
+	if primitive.screen.At(x, y) == borderColor || primitive.screen.At(x, y) == fillColor {
+		return
+	}
+	primitive.plotPixel(x, y, fillColor)
+	primitive.BorderFill(x+1, y, fillColor, borderColor)
+	primitive.BorderFill(x-1, y, fillColor, borderColor)
+	primitive.BorderFill(x, y+1, fillColor, borderColor)
+	primitive.BorderFill(x, y-1, fillColor, borderColor)
+}
+
+func (primitive *primitiveRendererСlass) FloodFill(x, y int, fillColor color.Color, boundaryColor color.Color) {
+	width, height := primitive.screen.Size()
+	originalColor := primitive.screen.At(x, y)
+
+	// Check if the initial pixel is already the fill color or is the boundary color
+	if originalColor == fillColor || originalColor == boundaryColor {
+		return // No need to fill
+	}
+
+	// Define the recursive function inside FloodFill
+	var floodFillRecursive func(x, y int)
+	floodFillRecursive = func(x, y int) {
+		// Check bounds
+		if x < 0 || x >= width || y < 0 || y >= height {
+			return // Out of bounds
+		}
+
+		currentColor := primitive.screen.At(x, y)
+		if currentColor != originalColor {
+			return // Not the original color, stop recursion
+		}
+
+		// Set the pixel to the fill color
+		primitive.screen.Set(x, y, fillColor)
+
+		// Recursive calls for neighboring pixels
+		floodFillRecursive(x+1, y) // Right
+		floodFillRecursive(x-1, y) // Left
+		floodFillRecursive(x, y+1) // Down
+		floodFillRecursive(x, y-1) // Up
+	}
+
+	// Call the recursive function
+	floodFillRecursive(x, y)
 }

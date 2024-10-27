@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"errors"
 	"fmt"
 	"image/color"
 
@@ -225,22 +226,63 @@ func (primitive *primitiveRendererСlass) DrawEllipse(center Point2D, a int, b i
 	}
 }
 
-func (primitive *primitiveRendererСlass) DrawPolygon(points []Point2D, lineColor color.Color) error {
-	if len(points) < 3 {
-		return fmt.Errorf("Need at least three points to form a polygon")
+func (pr *primitiveRendererСlass) DrawPolygon(points []Point2D, lineColor color.Color) error {
+	if len(points) < 2 {
+		return errors.New("Polygon can't consist of < 3 points")
+	}
+	st_x, st_y := points[0].GetCoords()
+	fn_x, fn_y := points[len(points)-1].GetCoords()
+	if st_x != fn_x && st_y != fn_y {
+		return errors.New("First and last points should be same")
 	}
 
-	for i := 0; i < len(points); i++ {
+	for i := 0; i < len(points)-1; i++ {
 		startPoint := points[i]
-		endPoint := points[(i+1)%len(points)]
-		startX, startY := startPoint.GetCoords()
-		endX, endY := endPoint.GetCoords()
-
-		primitive.segment(startX, startY, endX, endY, lineColor)
+		endPoint := points[i+1]
+		line := NewLineSegment(pr.screen, pr.backgroundColor) // Use transparent as background
+		line.Segment(startPoint, endPoint, lineColor)
+		pr.lines = append(pr.lines, line)
 	}
-	primitive.segment(350, 250, 500, 100, lineColor)
+	pr.col = lineColor
+	minX := 100000
+	minY := 100000
+	maxX := 0
+	maxY := 0
+	for _, p := range points {
 
-	return nil
+		x, y := p.GetCoords()
+		if x < minX {
+			minX = x
+		}
+		if x > maxX {
+			maxX = x
+		}
+		if y > maxY {
+			maxY = y
+		}
+
+		if y < minY {
+			minY = y
+		}
+	}
+	medX := (minX + maxX) / 2
+	medY := (minY + maxY) / 2
+	for i := minX; i < maxX; i++ {
+
+		if isPointInPolygon(NewPoint2D(pr.screen, pr.backgroundColor, i, medY, pr.col), points, pr.screen, pr.backgroundColor) {
+			pr.FloodFill(i+1, medY+1, pr.col, pr.backgroundColor)
+
+			return nil
+		}
+	}
+	for i := minY; i < maxY; i++ {
+		if isPointInPolygon(NewPoint2D(pr.screen, pr.backgroundColor, medX, i, pr.col), points, pr.screen, pr.backgroundColor) {
+			pr.FloodFill(medX+1, i+1, pr.col, pr.backgroundColor)
+			return nil
+		}
+	}
+
+	return errors.New("Point was not found")
 }
 
 func (primitive *primitiveRendererСlass) FillSquare(x int, y int, s int, col color.Color) {

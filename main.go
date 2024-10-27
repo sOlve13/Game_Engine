@@ -123,14 +123,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	test_dot2.PlotPixel()
 
 	points2 := []objects.Point2D{
-		objects.NewPoint2D(screen, g.backgroundColor, 500, 100, col), // Top vertex
-		objects.NewPoint2D(screen, g.backgroundColor, 650, 250, col), // Bottom-right vertex
-		objects.NewPoint2D(screen, g.backgroundColor, 600, 400, col), // Bottom vertex
-		objects.NewPoint2D(screen, g.backgroundColor, 400, 400, col), // Bottom-left vertex
-		objects.NewPoint2D(screen, g.backgroundColor, 350, 250, col), // Top-left vertex
+		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 800, 300, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 900, 200, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
 	}
 	testPolygon := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testPolygon.DrawPolygon(points2, col2)
+	err := testPolygon.DrawPolygon(points2, col2)
+	logError(err)
 	testCircle := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 	centerCircle := objects.NewPoint2D(screen, g.backgroundColor, 100, 100, col)
 	testCircle.DrawCircle(centerCircle, 50, col)

@@ -123,10 +123,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	test_dot2.PlotPixel()
 
 	points2 := []objects.Point2D{
-		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 800, 300, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 900, 200, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 800, 350, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 1000, 500, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 600, 500, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 600, 350, col),
+		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
 	}
 	testPolygon := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 	err := testPolygon.DrawPolygon(points2, col2)
@@ -144,7 +146,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	testFillSquare.FillSquare(50, 200, 200, col)
 
 	testFloodFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testFloodFill.FloodFill(951, 201, col2, g.backgroundColor)
+	testFloodFill.FloodFill(951, 201, col, g.backgroundColor)
 }
 
 func (g *Game) Layout(int, int) (int, int) {

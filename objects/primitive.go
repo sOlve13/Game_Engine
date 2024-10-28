@@ -308,17 +308,14 @@ func (primitive *primitiveRendererСlass) FloodFill(x, y int, fillColor color.Co
 	width, height := primitive.screen.Size()
 	originalColor := primitive.screen.At(x, y)
 
-	// Check if the initial pixel is already the fill color or is the boundary color
 	if originalColor == fillColor || originalColor == boundaryColor {
-		return // No need to fill
+		return
 	}
 
-	// Define the recursive function inside FloodFill
 	var floodFillRecursive func(x, y int)
 	floodFillRecursive = func(x, y int) {
-		// Check bounds
 		if x < 0 || x >= width || y < 0 || y >= height {
-			return // Out of bounds
+			return
 		}
 
 		currentColor := primitive.screen.At(x, y)
@@ -326,16 +323,13 @@ func (primitive *primitiveRendererСlass) FloodFill(x, y int, fillColor color.Co
 			return // Not the original color, stop recursion
 		}
 
-		// Set the pixel to the fill color
 		primitive.screen.Set(x, y, fillColor)
 
-		// Recursive calls for neighboring pixels
 		floodFillRecursive(x+1, y) // Right
 		floodFillRecursive(x-1, y) // Left
 		floodFillRecursive(x, y+1) // Down
 		floodFillRecursive(x, y-1) // Up
 	}
 
-	// Call the recursive function
 	floodFillRecursive(x, y)
 }

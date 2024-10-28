@@ -50,7 +50,7 @@ func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, co
 	deltY := finalY - startY
 	if deltX == 0 && deltY == 0 {
 		err = fmt.Errorf("Line can't be 0")
-		return err // No line to draw
+		return err
 	}
 
 	if deltX == 0 { // Vertical line case
@@ -77,7 +77,7 @@ func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, co
 		}
 		for x := startX; x != finalX+step; x += step {
 			primitive.plotPixel(x, int(y), col)
-			y += slope // Increment y
+			y += slope
 		}
 	} else { // Case where |slope| > 1, swap roles of x and y
 		x := float64(startX)

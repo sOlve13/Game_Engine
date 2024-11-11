@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,7 +16,7 @@ func absolute(num float64) float64 {
 	return num
 }
 
-type PrimitiveRendererСlass interface {
+type PrimitiveRendererClass interface {
 	plotPixel(int, int, color.Color)
 	segment(int, int, int, int, color.Color) error
 	DrawSquare(int, int, int, color.Color) error
@@ -26,6 +27,13 @@ type PrimitiveRendererСlass interface {
 	FloodFill(int, int, color.Color, color.Color)
 	BorderFill(int, int, color.Color, color.Color)
 	DrawEllipse(Point2D, int, int, color.Color)
+	//RotateSquare(int, int, int, float64, color.Color) error
+	TranslateSquare(int, int, int, int, int, color.Color) error
+	TranslatePolygon([]Point2D, int, int, color.Color) error    // Translate a polygon
+	TranslatePolyline([]Point2D, int, int, color.Color) error   // Translate a polyline
+	TranslateEllipse(Point2D, int, int, int, color.Color) error // Translate an ellipse
+	TranslateCircle(Point2D, int, int, color.Color) error       // Translate a circle
+	ScaleSquare(int, int, int, float64, color.Color) error
 }
 
 type primitiveRendererСlass struct {
@@ -39,8 +47,8 @@ type primitiveRendererСlass struct {
 	lines           []LineSegment
 }
 
-func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color) PrimitiveRendererСlass {
-	return &primitiveRendererСlass{
+func NewPrimitiveRendererclass(screen *ebiten.Image, backgroundColor color.Color) primitiveRendererСlass {
+	return primitiveRendererСlass{
 		screen:          screen,
 		startX:          0,
 		startY:          0,
@@ -332,4 +340,128 @@ func (primitive *primitiveRendererСlass) FloodFill(x, y int, fillColor color.Co
 	}
 
 	floodFillRecursive(x, y)
+}
+
+// RotatePolygon rotates a polygon around a given pivot point by a certain angle in degrees.
+func (primitive *primitiveRendererСlass) RotatePolygon(polygon []Point2D, pivot Point2D, angleDeg float64, col color.Color) error {
+	// Convert angle to radians
+	angleRad := angleDeg * math.Pi / 180
+
+	// Get the pivot coordinates
+	pivotX, pivotY := pivot.GetCoords()
+
+	// Rotate each point in the polygon
+	for _, point := range polygon {
+		// Get the current point coordinates
+		x, y := point.GetCoords()
+
+		// Translate the point to the origin (subtract pivot coordinates)
+		x -= pivotX
+		y -= pivotY
+
+		// Apply rotation transformation
+		newX := float64(x)*math.Cos(angleRad) - float64(y)*math.Sin(angleRad)
+		newY := float64(x)*math.Sin(angleRad) + float64(y)*math.Cos(angleRad)
+
+		// Translate the point back from the origin (add pivot coordinates)
+		newX += float64(pivotX)
+		newY += float64(pivotY)
+
+		// Update the point's position (round to nearest integer)
+		point.ChangeCoords(int(newX), int(newY))
+
+		// Optionally, re-plot the rotated point if needed
+		point.PlotPixel()
+	}
+
+	return nil
+}
+
+func (primitive *primitiveRendererСlass) TranslateSquare(x, y, s, dx, dy int, col color.Color) {
+	primitive.DrawSquare(x, y, s, primitive.backgroundColor)
+	x += dx
+	y += dy
+	primitive.DrawSquare(x, y, s, col)
+}
+
+func (primitive *primitiveRendererСlass) TranslatePolygon(polygon []Point2D, dx, dy int, col color.Color) error {
+	// Translate each point of the polygon
+	var translatedPolygon []Point2D
+	for _, point := range polygon {
+		// Get the current coordinates
+		X, Y := point.GetCoords()
+
+		// Translate the point by dx and dy
+		translatedPoint := NewPoint2D(point.(*point2D).screen, point.(*point2D).backgroundColor, X+dx, Y+dy, col)
+
+		// Append the translated point to the new polygon slice
+		translatedPolygon = append(translatedPolygon, translatedPoint)
+	}
+
+	// Draw the translated polygon
+	primitive.DrawPolygon(translatedPolygon, col)
+	return nil
+}
+
+func (primitive *primitiveRendererСlass) TranslatePolyline(points []Point2D, dx, dy int, col color.Color) error {
+	// Translate each point of the polyline
+	var translatedPolyline []Point2D
+	for _, point := range points {
+		// Get the current coordinates
+		X, Y := point.GetCoords()
+
+		// Translate the point by dx and dy
+		translatedPoint := NewPoint2D(point.(*point2D).screen, point.(*point2D).backgroundColor, X+dx, Y+dy, col)
+
+		// Append the translated point to the new polyline slice
+		translatedPolyline = append(translatedPolyline, translatedPoint)
+	}
+
+	// Draw the translated polyline
+	primitive.DrawPolyline(translatedPolyline, col)
+	return nil
+}
+
+func (primitive *primitiveRendererСlass) TranslateEllipse(center Point2D, a, b, dx, dy int, col color.Color) error {
+	centerX, centerY := center.GetCoords()
+
+	// Translate the center by dx and dy
+	newCenter := NewPoint2D(center.(*point2D).screen, center.(*point2D).backgroundColor, centerX+dx, centerY+dy, col)
+
+	// Use the existing DrawEllipse method to draw the translated ellipse
+	primitive.DrawEllipse(newCenter, a, b, col)
+	return nil
+}
+func (primitive *primitiveRendererСlass) TranslateCircle(center Point2D, radius, dx, dy int, col color.Color) error {
+	centerX, centerY := center.GetCoords()
+
+	// Translate the center by dx and dy
+	newCenter := NewPoint2D(center.(*point2D).screen, center.(*point2D).backgroundColor, centerX+dx, centerY+dy, col)
+
+	// Use the existing DrawCircle method to draw the translated circle
+	primitive.DrawCircle(newCenter, radius, col)
+	return nil
+}
+
+// Scaling for square
+func (primitive *primitiveRendererСlass) ScaleSquare(x int, y int, S int, scaleFactor float64, col color.Color) error {
+	if scaleFactor <= 0 {
+		return fmt.Errorf("Scaling factor must be positive")
+	}
+
+	newS := int(float64(S) * scaleFactor)
+	if newS < 1 {
+		newS = 1
+	}
+
+	centerX := x + S/2
+	centerY := y + S/2
+
+	newCenterX := centerX
+	newCenterY := centerY
+
+	newX := newCenterX - newS/2
+	newY := newCenterY - newS/2
+
+	return primitive.DrawSquare(newX, newY, newS, col)
 }

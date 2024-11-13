@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -18,7 +19,7 @@ func absolute(num float64) float64 {
 type PrimitiveRendererСlass interface {
 	plotPixel(int, int, color.Color)
 	segment(int, int, int, int, color.Color) error
-	DrawSquare(int, int, int, color.Color) error
+	DrawSquare(int, int, int, int, color.Color) error
 	DrawPolyline([]Point2D, color.Color)
 	DrawCircle(Point2D, int, color.Color)
 	FillSquare(int, int, int, color.Color)
@@ -106,18 +107,30 @@ func (primitive *primitiveRendererСlass) segment(startX int, startY int, finalX
 	return nil
 }
 
-func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, col color.Color) error {
-	var err error
+func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, angle int, col color.Color) error {
 	if X <= 0 && Y <= 0 && S < 1 {
-		err = fmt.Errorf("Square should be on the screen and not smaller than 1 px")
-		return err
+		return fmt.Errorf("Square should be on the screen and not smaller than 1 px")
 	}
 
-	primitive.segment(X, Y, X+S, Y, col)
-	primitive.segment(X, Y, X, Y+S, col)
-	primitive.segment(X+S, Y, X+S, Y+S, col)
-	primitive.segment(X, Y+S, X+S, Y+S, col)
+	// Переводим угол в радианы
+	radAngle := float64(angle) * math.Pi / 180.0
 
+	// Вычисляем смещение от центра для каждой вершины
+	halfS := float64(S) / 2.0
+
+	// Вычисляем координаты вершин с учетом угла поворота
+	x1, y1 := rotatePoint(X, Y, X-int(halfS), Y-int(halfS), radAngle)
+	x2, y2 := rotatePoint(X, Y, X+int(halfS), Y-int(halfS), radAngle)
+	x3, y3 := rotatePoint(X, Y, X+int(halfS), Y+int(halfS), radAngle)
+	x4, y4 := rotatePoint(X, Y, X-int(halfS), Y+int(halfS), radAngle)
+
+	// Рисуем стороны квадрата с использованием обновленных координат
+	primitive.segment(x1, y1, x2, y2, col)
+	primitive.segment(x2, y2, x3, y3, col)
+	primitive.segment(x3, y3, x4, y4, col)
+	primitive.segment(x4, y4, x1, y1, col)
+
+	// Сохраняем параметры
 	primitive.startX = X
 	primitive.startY = Y
 	primitive.S = S

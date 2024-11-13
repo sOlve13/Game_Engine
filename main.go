@@ -1,13 +1,12 @@
 package main
 
 import (
+	"Game_Engine/objects"
 	"flag"
 	"fmt"
 	"image/color"
 	"log"
 	"os"
-
-	"Game_Engine/objects"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -92,61 +91,76 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screenWidth, screenHeight := ebiten.WindowSize()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
+	//Test full layer of constructors
+	gmOb := objects.NewGameObject(screen, g.backgroundColor)
+	drawOb := objects.NewDrawableObject(gmOb)
+	tranOb := objects.NewTransformableObject(gmOb)
+	shapOb := objects.NewShapeObject(drawOb, tranOb)
+	col := color.RGBA{150, 100, 200, 255}
+	squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
+	squaOb1.Draw()
+	//Test enhanced method
+	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 300, 300, col)
+	squaOb2.Draw()
+	/*
+	   col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
+	   col2 := color.RGBA{50, 100, 200, 255}
+	   testSegment := objects.NewLineSegment(screen, g.backgroundColor)
+	   testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, col), col)
+	   testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col))
 
-	col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
-	col2 := color.RGBA{50, 100, 200, 255}
-	testSegment := objects.NewLineSegment(screen, g.backgroundColor)
-	testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, col), col)
-	testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col))
+	   testSegmentDefault := objects.NewLineSegment(screen, g.backgroundColor)
+	   testSegmentDefault.Segment(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
+	   testSegmentDefault.ChangeFinal(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col))
 
-	testSegmentDefault := objects.NewLineSegment(screen, g.backgroundColor)
-	testSegmentDefault.Segment(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
-	testSegmentDefault.ChangeFinal(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col))
+	   testSquare1 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testSquare2 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testSquare1.DrawSquare(50, 200, 200, col)
+	   testSquare2.DrawSquare(950, 200, 100, col)
+	   testPolyline := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 
-	testSquare1 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testSquare2 := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testSquare1.DrawSquare(50, 200, 200, col)
-	testSquare2.DrawSquare(950, 200, 100, col)
-	testPolyline := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	points := []objects.Point2D{
-		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 600, 300, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
-	}
-	testPolyline.DrawPolyline(points, col)
-	test_dot := objects.NewPoint2D(screen, g.backgroundColor, 500, 500, col)
-	test_dot.PlotPixel()
-	test_dot1 := objects.NewPoint2D(screen, g.backgroundColor, 501, 500, col)
-	test_dot1.PlotPixel()
-	test_dot2 := objects.NewPoint2D(screen, g.backgroundColor, 502, 500, col)
-	test_dot2.PlotPixel()
+	   	points := []objects.Point2D{
+	   		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 600, 300, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 700, 200, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 500, 200, col),
+	   	}
 
-	points2 := []objects.Point2D{
-		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 800, 350, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 1000, 500, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 600, 500, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 600, 350, col),
-		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
-	}
-	testPolygon := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	err := testPolygon.DrawPolygon(points2, col2)
-	logError(err)
-	testCircle := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	centerCircle := objects.NewPoint2D(screen, g.backgroundColor, 100, 100, col)
-	testCircle.DrawCircle(centerCircle, 50, col)
-	centerEllipse := objects.NewPoint2D(screen, g.backgroundColor, 700, 700, col)
-	testEllipse := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testEllipse.DrawEllipse(centerEllipse, 100, 50, col)
-	testBorderFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testBorderFill.BorderFill(101, 102, col2, col)
+	   testPolyline.DrawPolyline(points, col)
+	   test_dot := objects.NewPoint2D(screen, g.backgroundColor, 500, 500, col)
+	   test_dot.PlotPixel()
+	   test_dot1 := objects.NewPoint2D(screen, g.backgroundColor, 501, 500, col)
+	   test_dot1.PlotPixel()
+	   test_dot2 := objects.NewPoint2D(screen, g.backgroundColor, 502, 500, col)
+	   test_dot2.PlotPixel()
 
-	testFillSquare := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testFillSquare.FillSquare(50, 200, 200, col)
+	   	points2 := []objects.Point2D{
+	   		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 800, 350, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 1000, 500, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 600, 500, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 600, 350, col),
+	   		objects.NewPoint2D(screen, g.backgroundColor, 750, 250, col),
+	   	}
 
-	testFloodFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-	testFloodFill.FloodFill(951, 201, col, g.backgroundColor)
+	   testPolygon := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   err := testPolygon.DrawPolygon(points2, col2)
+	   logError(err)
+	   testCircle := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   centerCircle := objects.NewPoint2D(screen, g.backgroundColor, 100, 100, col)
+	   testCircle.DrawCircle(centerCircle, 50, col)
+	   centerEllipse := objects.NewPoint2D(screen, g.backgroundColor, 700, 700, col)
+	   testEllipse := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testEllipse.DrawEllipse(centerEllipse, 100, 50, col)
+	   testBorderFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testBorderFill.BorderFill(101, 102, col2, col)
+
+	   testFillSquare := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testFillSquare.FillSquare(50, 200, 200, col)
+
+	   testFloodFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
+	   testFloodFill.FloodFill(951, 201, col, g.backgroundColor)
+	*/
 }
 
 func (g *Game) Layout(int, int) (int, int) {

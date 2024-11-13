@@ -2,6 +2,7 @@ package objects
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -83,4 +84,16 @@ func isPointInPolygon(p Point2D, polygon []Point2D, screen *ebiten.Image, backgr
 	}
 	// Точка внутри полигона, если количество пересечений нечетное
 	return count%2 == 1
+}
+
+func rotatePoint(cx, cy, x, y int, angle float64) (int, int) {
+	// Переводим в float64 для вычислений
+	xf, yf := float64(x-cx), float64(y-cy)
+
+	// Применяем формулы поворота
+	newX := xf*math.Cos(angle) - yf*math.Sin(angle)
+	newY := xf*math.Sin(angle) + yf*math.Cos(angle)
+
+	// Переводим обратно к целым числам
+	return int(newX) + cx, int(newY) + cy
 }

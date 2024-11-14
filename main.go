@@ -117,6 +117,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	lineOb2.Draw()
 	lineOb2.Translate(-400, -300)
 	lineOb2.Scale(4)
+
+	circOb1 := objects.EnhancedNewCircleObject(screen, g.backgroundColor, 100, 600, 40, col)
+	circOb1.Draw()
+	circOb1.Scale(2)
+	circOb1.Translate(0, -200)
 	/*
 	   col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 	   col2 := color.RGBA{50, 100, 200, 255}

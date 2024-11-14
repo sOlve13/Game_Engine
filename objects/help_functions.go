@@ -87,13 +87,20 @@ func isPointInPolygon(p Point2D, polygon []Point2D, screen *ebiten.Image, backgr
 }
 
 func rotatePoint(x, y, cx, cy int, angle float64) (int, int) {
-	// Переводим в float64 для вычислений
 	xf, yf := float64(x-cx), float64(y-cy)
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
 
-	// Применяем формулы поворота
-	newX := xf*math.Cos(angle) - yf*math.Sin(angle)
-	newY := xf*math.Sin(angle) + yf*math.Cos(angle)
+	// Если угол близок к 90°, 180°, 270°, 360°, то округляем cosA и sinA
+	if math.Abs(cosA) < 1e-10 {
+		cosA = 0
+	}
+	if math.Abs(sinA) < 1e-10 {
+		sinA = 0
+	}
 
-	// Переводим обратно к целым числам
-	return int(newX) + cx, int(newY) + cy
+	newX := xf*cosA - yf*sinA
+	newY := xf*sinA + yf*cosA
+
+	return int(math.Round(newX)) + cx, int(math.Round(newY)) + cy
 }

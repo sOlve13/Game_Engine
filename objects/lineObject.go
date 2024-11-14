@@ -60,21 +60,19 @@ func (lineObject *lineObject) Draw() error {
 	translationY := lineObject.GetShapeObject().GetTransformableObject().GetTranslationY()
 	x1, y1 = x1+translationX, y1+translationY
 	x2, y2 = x2+translationX, y2+translationY
-	fmt.Println("After Translation:", x1, y1, x2, y2)
 
 	// Применяем масштабирование к обеим точкам
 	scale := lineObject.shapeObject.GetTransformableObject().GetScale()
 	dx := (x2 - x1) * (scale - 1)
 	dy := (y2 - y1) * (scale - 1)
 	x2, y2 = x2+dx, y2+dy
-	fmt.Println("After Scaling:", x1, y1, x2, y2)
 
 	// Применяем поворот относительно центра линии
 	radAngle := float64(lineObject.shapeObject.GetTransformableObject().GetAngle()) * math.Pi / 180.0
 	centrX, centrY := (x1+x2)/2, (y1+y2)/2
+	fmt.Println("After Rotation:", centrX, centrY)
 	x1, y1 = rotatePoint(x1, y1, centrX, centrY, radAngle)
 	x2, y2 = rotatePoint(x2, y2, centrX, centrY, radAngle)
-	fmt.Println("After Rotation:", x1, y1, x2, y2)
 
 	lineObject.segment.Segment(NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x1, y1, lineObject.color), NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x2, y2, lineObject.color), lineObject.color)
 	lineObject.shapeObject.GetDrawableObject().Draw()
@@ -89,21 +87,18 @@ func (lineObject *lineObject) UnDraw() error {
 	translationY := lineObject.GetShapeObject().GetTransformableObject().GetTranslationY()
 	x1, y1 = x1+translationX, y1+translationY
 	x2, y2 = x2+translationX, y2+translationY
-	fmt.Println("After Translation:", x1, y1, x2, y2)
 
 	// Применяем масштабирование к обеим точкам
 	scale := lineObject.shapeObject.GetTransformableObject().GetScale()
 	dx := (x2 - x1) * (scale - 1)
 	dy := (y2 - y1) * (scale - 1)
 	x2, y2 = x2+dx, y2+dy
-	fmt.Println("After Scaling:", x1, y1, x2, y2)
 
 	// Применяем поворот относительно центра линии
 	radAngle := float64(lineObject.shapeObject.GetTransformableObject().GetAngle()) * math.Pi / 180.0
 	centrX, centrY := (x1+x2)/2, (y1+y2)/2
 	x1, y1 = rotatePoint(x1, y1, centrX, centrY, radAngle)
 	x2, y2 = rotatePoint(x2, y2, centrX, centrY, radAngle)
-	fmt.Println("After Rotation:", x1, y1, x2, y2)
 
 	lineObject.segment.Segment(NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x1, y1, lineObject.color), NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x2, y2, lineObject.color), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor())
 	lineObject.shapeObject.GetDrawableObject().Draw()

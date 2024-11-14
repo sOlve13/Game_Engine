@@ -22,9 +22,13 @@ func init() {
 }
 
 type Game struct {
-	buttonImage     *ebiten.Image
-	backgroundColor color.Color
-	IsPressed       bool
+	buttonImage      *ebiten.Image
+	backgroundColor  color.Color
+	IsPressed        bool
+	xTranslate       int
+	yTranslate       int
+	translationSpeed int
+	angle            int
 }
 
 func NewGame(screenWidth, screenHeight int) *Game {
@@ -32,9 +36,13 @@ func NewGame(screenWidth, screenHeight int) *Game {
 	buttonImage.Fill(color.RGBA{220, 220, 220, 255})
 
 	return &Game{
-		buttonImage:     buttonImage,
-		backgroundColor: color.Black,
-		IsPressed:       false,
+		buttonImage:      buttonImage,
+		backgroundColor:  color.Black,
+		IsPressed:        false,
+		xTranslate:       0,
+		yTranslate:       0,
+		translationSpeed: 1,
+		angle:            0,
 	}
 }
 
@@ -46,6 +54,34 @@ func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 }
 
 func (g *Game) Update() error {
+
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		g.yTranslate = g.yTranslate - g.translationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		g.yTranslate = g.yTranslate + g.translationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		g.xTranslate = g.xTranslate - g.translationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.xTranslate = g.xTranslate + g.translationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyZ) {
+		g.translationSpeed = g.translationSpeed + 1
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyX) {
+		g.xTranslate = g.translationSpeed - 1
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyE) {
+		if g.angle >= 360 {
+			g.angle = g.angle - 360
+		}
+
+		g.angle = g.angle + 1
+	}
+
 	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	screenWidth, screenHeight := ebiten.WindowSize()
 
@@ -91,12 +127,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screenWidth, screenHeight := ebiten.WindowSize()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
+	col := color.RGBA{150, 100, 200, 255}
 	//Test full layer of constructors
+
 	gmOb := objects.NewGameObject(screen, g.backgroundColor)
 	drawOb := objects.NewDrawableObject(gmOb)
 	tranOb := objects.NewTransformableObject(gmOb)
 	shapOb := objects.NewShapeObject(drawOb, tranOb)
-	col := color.RGBA{150, 100, 200, 255}
+
 	squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
 	squaOb1.Draw()
 	squaOb1.Scale(2)
@@ -104,7 +142,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	squaOb1.Translate(200, 200)
 	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
 	squaOb2.Draw()
-	squaOb2.Rotate(30)
+	squaOb2.Rotate(g.angle)
 	squaOb2.Scale(2)
 	squaOb2.Translate(100, 100)
 
@@ -112,7 +150,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	lineOb1.Draw()
 	lineOb1.Translate(-400, -300)
 	lineOb1.Scale(4)
-	lineOb1.Rotate(60)
+	lineOb1.Rotate(g.angle)
 	lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
 	lineOb2.Draw()
 	lineOb2.Translate(-400, -300)
@@ -122,6 +160,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	circOb1.Draw()
 	circOb1.Scale(2)
 	circOb1.Translate(0, -200)
+
+	player := objects.NewPlayerObject(screen, g.backgroundColor, col, 600, 400)
+	player.Draw()
+	player.Translate(g.xTranslate, g.yTranslate)
+
 	/*
 	   col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 	   col2 := color.RGBA{50, 100, 200, 255}
@@ -192,7 +235,7 @@ func logError(err error) {
 }
 
 func main() {
-	tps := flag.Int("tps", 1, "Number of ticks per second (TPS)")
+	tps := flag.Int("tps", 60, "Number of ticks per second (TPS)")
 	flag.Parse()
 	width, height := 800, 600
 	game := NewGame(800, 600)

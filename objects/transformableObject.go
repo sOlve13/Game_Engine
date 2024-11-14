@@ -39,7 +39,7 @@ func (transformableObject *transformableObject) Rotate(angle int) error {
 }
 
 func (transformableObject *transformableObject) Scale(scale int) error {
-	transformableObject.angle = scale
+	transformableObject.scale = scale
 	return nil
 }
 

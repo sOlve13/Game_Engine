@@ -38,6 +38,6 @@ func (primitive *point2D) GetCoords() (int, int) {
 }
 
 func (primitive *point2D) ChangeCoords(x int, y int) {
-	primitive.screen.Set(primitive.X, primitive.Y, primitive.backgroundColor)
-	primitive.screen.Set(x, y, primitive.col)
+	primitive.X = x
+	primitive.Y = y
 }

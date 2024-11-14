@@ -9,6 +9,10 @@ import (
 type SquareObject interface {
 	GetShapeObject() ShapeObject
 	Draw() error
+	UnDraw() error
+	Translate(x, y int) error
+	Scale(S int) error
+	Rotate(angle int) error
 }
 
 type squareObject struct {
@@ -46,7 +50,34 @@ func (squareObject *squareObject) GetShapeObject() ShapeObject {
 
 func (squareObject *squareObject) Draw() error {
 	x, y := squareObject.squareTop.GetCoords()
-	squareObject.primitive.DrawSquare(x+squareObject.GetShapeObject().GetTransformableObject().GetTranslationX(), y+squareObject.GetShapeObject().GetTransformableObject().GetTranslationY(), squareObject.squareLenght+squareObject.GetShapeObject().GetTransformableObject().GetScale(), squareObject.GetShapeObject().GetTransformableObject().GetAngle(), squareObject.color)
+	squareObject.primitive.DrawSquare(x+squareObject.GetShapeObject().GetTransformableObject().GetTranslationX(), y+squareObject.GetShapeObject().GetTransformableObject().GetTranslationY(), squareObject.squareLenght*squareObject.GetShapeObject().GetTransformableObject().GetScale(), squareObject.GetShapeObject().GetTransformableObject().GetAngle(), squareObject.color)
 	squareObject.shapeObject.GetDrawableObject().Draw()
+	return nil
+}
+func (squareObject *squareObject) UnDraw() error {
+	x, y := squareObject.squareTop.GetCoords()
+	squareObject.primitive.DrawSquare(x+squareObject.GetShapeObject().GetTransformableObject().GetTranslationX(), y+squareObject.GetShapeObject().GetTransformableObject().GetTranslationY(), squareObject.squareLenght*squareObject.GetShapeObject().GetTransformableObject().GetScale(), squareObject.GetShapeObject().GetTransformableObject().GetAngle(), squareObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor())
+	squareObject.shapeObject.GetDrawableObject().Draw()
+	return nil
+}
+
+func (squareObject *squareObject) Translate(x, y int) error {
+	squareObject.UnDraw()
+	squareObject.GetShapeObject().GetTransformableObject().Translate(x, y)
+	squareObject.Draw()
+	return nil
+}
+
+func (squareObject *squareObject) Scale(S int) error {
+	squareObject.UnDraw()
+	squareObject.GetShapeObject().GetTransformableObject().Scale(S)
+	squareObject.Draw()
+	return nil
+}
+
+func (squareObject *squareObject) Rotate(angle int) error {
+	squareObject.UnDraw()
+	squareObject.GetShapeObject().GetTransformableObject().Rotate(angle)
+	squareObject.Draw()
 	return nil
 }

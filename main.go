@@ -99,9 +99,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	col := color.RGBA{150, 100, 200, 255}
 	squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
 	squaOb1.Draw()
-	//Test enhanced method
-	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 300, 300, col)
+	squaOb1.Scale(2)
+	squaOb1.Rotate(-30)
+	squaOb1.Translate(200, 200)
+	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
 	squaOb2.Draw()
+	squaOb2.Rotate(30)
+	squaOb2.Scale(2)
+	squaOb2.Translate(100, 100)
+
+	lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	lineOb1.Draw()
+	lineOb1.Translate(-400, -300)
+	lineOb1.Scale(4)
+	lineOb1.Rotate(60)
+	lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	lineOb2.Draw()
+	lineOb2.Translate(-400, -300)
+	lineOb2.Scale(4)
 	/*
 	   col := color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 	   col2 := color.RGBA{50, 100, 200, 255}

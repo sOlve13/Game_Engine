@@ -21,7 +21,7 @@ type PrimitiveRendererСlass interface {
 	segment(int, int, int, int, color.Color) error
 	DrawSquare(int, int, int, int, color.Color) error
 	DrawPolyline([]Point2D, color.Color)
-	DrawCircle(Point2D, int, color.Color)
+	DrawCircle(int, int, int, color.Color)
 	FillSquare(int, int, int, color.Color)
 	DrawPolygon([]Point2D, color.Color) error
 	FloodFill(int, int, color.Color, color.Color)
@@ -57,50 +57,31 @@ func (primitive *primitiveRendererСlass) plotPixel(x int, y int, col color.Colo
 }
 
 func (primitive *primitiveRendererСlass) segment(startX int, startY int, finalX int, finalY int, col color.Color) error {
-	var err error
-
-	deltX := finalX - startX
-	deltY := finalY - startY
-	if deltX == 0 && deltY == 0 {
-		err = fmt.Errorf("Line can't be 0")
-		return err // No line to draw
+	dx := math.Abs(float64(finalX) - float64(startX))
+	dy := math.Abs(float64(finalY) - float64(startY))
+	sx := -1
+	if startX < finalX {
+		sx = 1
 	}
-
-	if deltX == 0 { // Vertical line case
-		step := 1
-		if deltY < 0 {
-			step = -1
-		}
-		for y := startY; y != finalY+step; y += step {
-			primitive.plotPixel(startX, y, col)
-		}
-		return nil
+	sy := -1
+	if startY < finalY {
+		sy = 1
 	}
+	err := dx - dy
 
-	var slope float64
-	if deltX != 0 {
-		slope = float64(deltY) / float64(deltX) // Calculate slope
-	}
-
-	if absolute(slope) <= 1 { // Case where |slope| <= 1
-		y := float64(startY)
-		step := 1
-		if deltX < 0 {
-			step = -1
+	for {
+		primitive.plotPixel(startX, startY, col)
+		if startX == finalX && startY == finalY {
+			break
 		}
-		for x := startX; x != finalX+step; x += step {
-			primitive.plotPixel(x, int(y), col)
-			y += slope // Increment y
+		e2 := 2 * err
+		if e2 > -dy {
+			err -= dy
+			startX += sx
 		}
-	} else { // Case where |slope| > 1, swap roles of x and y
-		x := float64(startX)
-		step := 1
-		if deltY < 0 {
-			step = -1
-		}
-		for y := startY; y != finalY+step; y += step {
-			primitive.plotPixel(int(x), y, col) // Plot at rounded (x, y)
-			x += 1 / slope                      // Increment x
+		if e2 < dx {
+			err += dx
+			startY += sy
 		}
 	}
 
@@ -112,17 +93,24 @@ func (primitive *primitiveRendererСlass) DrawSquare(X int, Y int, S int, angle 
 		return fmt.Errorf("Square should be on the screen and not smaller than 1 px")
 	}
 
-	// Переводим угол в радианы
 	radAngle := float64(angle) * math.Pi / 180.0
 
 	// Вычисляем смещение от центра для каждой вершины
-	halfS := float64(S) / 2.0
+	centrX := X + S/2
+	centrY := Y + S/2
+
+	x1, y1 := X, Y
+	x2, y2 := X+S, Y
+	x3, y3 := X+S, Y+S
+	x4, y4 := X, Y+S
+
+	x1, y1 = rotatePoint(x1, y1, centrX, centrY, radAngle)
+	x2, y2 = rotatePoint(x2, y2, centrX, centrY, radAngle)
+	x3, y3 = rotatePoint(x3, y3, centrX, centrY, radAngle)
+
+	x4, y4 = rotatePoint(x4, y4, centrX, centrY, radAngle)
 
 	// Вычисляем координаты вершин с учетом угла поворота
-	x1, y1 := rotatePoint(X, Y, X-int(halfS), Y-int(halfS), radAngle)
-	x2, y2 := rotatePoint(X, Y, X+int(halfS), Y-int(halfS), radAngle)
-	x3, y3 := rotatePoint(X, Y, X+int(halfS), Y+int(halfS), radAngle)
-	x4, y4 := rotatePoint(X, Y, X-int(halfS), Y+int(halfS), radAngle)
 
 	// Рисуем стороны квадрата с использованием обновленных координат
 	primitive.segment(x1, y1, x2, y2, col)
@@ -154,8 +142,8 @@ func (pr *primitiveRendererСlass) DrawPolyline(points []Point2D, lineColor colo
 
 }
 
-func (primitive *primitiveRendererСlass) DrawCircle(center Point2D, radius int, col color.Color) {
-	centerX, centerY := center.GetCoords()
+func (primitive *primitiveRendererСlass) DrawCircle(x_, y_ int, radius int, col color.Color) {
+	centerX, centerY := x_, y_
 
 	x := 0
 	y := radius

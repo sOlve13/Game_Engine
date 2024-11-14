@@ -86,7 +86,7 @@ func isPointInPolygon(p Point2D, polygon []Point2D, screen *ebiten.Image, backgr
 	return count%2 == 1
 }
 
-func rotatePoint(cx, cy, x, y int, angle float64) (int, int) {
+func rotatePoint(x, y, cx, cy int, angle float64) (int, int) {
 	// Переводим в float64 для вычислений
 	xf, yf := float64(x-cx), float64(y-cy)
 

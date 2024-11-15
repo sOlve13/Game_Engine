@@ -104,3 +104,10 @@ func rotatePoint(x, y, cx, cy int, angle float64) (int, int) {
 
 	return int(math.Round(newX)) + cx, int(math.Round(newY)) + cy
 }
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}

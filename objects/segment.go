@@ -1,7 +1,6 @@
 package objects
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -40,59 +39,48 @@ func (primitive *lineSegment) plotPixel(x int, y int, col color.Color) {
 }
 
 func (primitive *lineSegment) Segment(startPoint Point2D, finalPoint Point2D, col color.Color) error {
-	var err error
 	startX, startY := startPoint.GetCoords()
 	finalX, finalY := finalPoint.GetCoords()
 	primitive.col = col
 	primitive.startPoint = startPoint
 	primitive.finalPoint = finalPoint
-	deltX := finalX - startX
-	deltY := finalY - startY
-	if deltX == 0 && deltY == 0 {
-		err = fmt.Errorf("Line can't be 0")
-		return err
+
+	// Разница координат
+	deltX := abs(finalX - startX)
+	deltY := abs(finalY - startY)
+
+	// Определяем направление шага
+	stepX := 1
+	if startX > finalX {
+		stepX = -1
+	}
+	stepY := 1
+	if startY > finalY {
+		stepY = -1
 	}
 
-	if deltX == 0 { // Vertical line case
-		step := 1
-		if deltY < 0 {
-			step = -1
-		}
-		for y := startY; y != finalY+step; y += step {
-			primitive.plotPixel(startX, y, col)
-		}
-		return nil
-	}
+	err := deltX - deltY
 
-	var slope float64
-	if deltX != 0 {
-		slope = float64(deltY) / float64(deltX) // Calculate slope
-	}
-
-	if absolute(slope) <= 1 { // Case where |slope| <= 1
-		y := float64(startY)
-		step := 1
-		if deltX < 0 {
-			step = -1
+	x, y := startX, startY
+	for {
+		primitive.plotPixel(x, y, col)
+		if x == finalX && y == finalY {
+			break
 		}
-		for x := startX; x != finalX+step; x += step {
-			primitive.plotPixel(x, int(y), col)
-			y += slope
+		e2 := err * 2
+		if e2 > -deltY {
+			err -= deltY
+			x += stepX
 		}
-	} else { // Case where |slope| > 1, swap roles of x and y
-		x := float64(startX)
-		step := 1
-		if deltY < 0 {
-			step = -1
-		}
-		for y := startY; y != finalY+step; y += step {
-			primitive.plotPixel(int(x), y, col) // Plot at rounded (x, y)
-			x += 1 / slope                      // Increment x
+		if e2 < deltX {
+			err += deltX
+			y += stepY
 		}
 	}
 
 	return nil
 }
+
 func (primitive *lineSegment) SegmentDefault(startPoint Point2D, finalPoint Point2D, col color.Color) {
 	primitive.startPoint = startPoint
 	primitive.finalPoint = finalPoint

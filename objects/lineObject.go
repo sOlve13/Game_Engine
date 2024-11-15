@@ -70,10 +70,10 @@ func (lineObject *lineObject) Draw() error {
 	// Применяем поворот относительно центра линии
 	radAngle := float64(lineObject.shapeObject.GetTransformableObject().GetAngle()) * math.Pi / 180.0
 	centrX, centrY := (x1+x2)/2, (y1+y2)/2
-	fmt.Println("After Rotation:", centrX, centrY)
+	fmt.Println(lineObject.shapeObject.GetTransformableObject().GetAngle(), centrX, centrY, x1, y1, x2, y2)
 	x1, y1 = rotatePoint(x1, y1, centrX, centrY, radAngle)
 	x2, y2 = rotatePoint(x2, y2, centrX, centrY, radAngle)
-
+	fmt.Println(lineObject.shapeObject.GetTransformableObject().GetAngle(), centrX, centrY, x1, y1, x2, y2)
 	lineObject.segment.Segment(NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x1, y1, lineObject.color), NewPoint2D(lineObject.shapeObject.GetDrawableObject().GetGameObject().GetScreen(), lineObject.shapeObject.GetDrawableObject().GetGameObject().GetBackgroundColor(), x2, y2, lineObject.color), lineObject.color)
 	lineObject.shapeObject.GetDrawableObject().Draw()
 	return nil

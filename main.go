@@ -147,9 +147,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	squaOb2.Translate(100, 100)
 
 	lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+
 	lineOb1.Draw()
-	lineOb1.Translate(-400, -300)
+	lineOb1.Translate(-300, -400)
 	lineOb1.Scale(4)
+
 	lineOb1.Rotate(g.angle)
 	lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
 	lineOb2.Draw()

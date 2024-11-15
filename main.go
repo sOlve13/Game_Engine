@@ -71,7 +71,7 @@ func (g *Game) Update() error {
 		g.translationSpeed = g.translationSpeed + 1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyX) {
-		if g.translationSpeed <= 0 {
+		if g.translationSpeed <= 1 {
 			g.translationSpeed = 1
 		} else {
 			g.translationSpeed = g.translationSpeed - 1

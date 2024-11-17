@@ -94,7 +94,11 @@ func (g *Game) Update() error {
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyX) {
-		g.xTranslate = g.translationSpeed - 1
+		if g.translationSpeed <= 1 {
+			g.translationSpeed = 1
+		} else {
+			g.translationSpeed = g.translationSpeed - 1
+		}
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) {

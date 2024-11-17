@@ -1,8 +1,11 @@
 package objects
 
 import (
+	"fmt"
+	"image"
 	"image/color"
 	"math"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -110,4 +113,57 @@ func abs(x int) int {
 		return -x
 	}
 	return x
+}
+
+func getImageSize(filePath string) (int, int, error) {
+	// Открываем файл
+	file, err := os.Open(filePath)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer file.Close()
+
+	// Декодируем изображение
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Получаем размеры изображения
+	return img.Bounds().Dx(), img.Bounds().Dy(), nil
+}
+
+func contains(slice []int, item int) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
+func indexOf(slice []int, item int) int {
+	for i, v := range slice {
+		if v == item {
+			return i
+		}
+	}
+	return -1 // Если элемент не найден
+}
+
+func writeToFile(filename, text string) error {
+	// Открываем файл для записи, который перезапишет существующее содержимое
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+	if err != nil {
+		return fmt.Errorf("Ошибка при открытии файла: %v", err)
+	}
+	defer file.Close()
+
+	// Записываем текст в файл
+	_, err = file.WriteString(text)
+	if err != nil {
+		return fmt.Errorf("Ошибка при записи в файл: %v", err)
+	}
+
+	return nil
 }

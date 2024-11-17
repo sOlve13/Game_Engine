@@ -7,81 +7,193 @@ import (
 )
 
 type PlayerObject interface {
-	GetShapeObject() ShapeObject
-	Draw() error
-	UnDraw() error
-	Translate(x, y int) error
-	Scale(S int) error
-	Rotate(angle int) error
+	GetSpriteObject() SpriteObject
+	LoadHero(folderPath string) error
+	SetRightMovement(rmv []int) error
+	SetLeftMovement(lmv []int) error
+	SetTopMovement(tmv []int) error
+	SetDownMovement(dmv []int) error
+	SetAttack(att []int) error
+	SetCalm(cal int) error
+	Move(isRight, isLeft, isTop, isDown, isAttack bool, x, y int) error
 }
 
 type playerObject struct {
-	shapeObject ShapeObject
-	body        SquareObject
-	head        CircleObject
-	leg1        LineObject
-	leg2        LineObject
-	hand1       LineObject
-	hand2       LineObject
-	color       color.Color
+	spriteObject  SpriteObject
+	calm          int
+	rightMovement []int
+	leftMovement  []int
+	topMovement   []int
+	downMovement  []int
+	attack        []int
 }
 
 func NewPlayerObject(screen *ebiten.Image, backgroundColor color.Color, color color.Color, x, y int) PlayerObject {
 	gmob := NewGameObject(screen, backgroundColor)
-	shapeObject := NewShapeObject(NewDrawableObject(gmob), NewTransformableObject(gmob))
+	bmHd := NewBitmapHandler(x, y)
+	var myList []BitmapHandler
+	myList = append(myList, bmHd)
+
+	bmOb := NewBitmapObject(myList, NewDrawableObject(gmob))
+	spriteObject := NewSpriteObject(bmOb, "player")
+
 	return &playerObject{
-		shapeObject: shapeObject,
-		color:       color,
-		body:        NewSquareObject(shapeObject, x, y, 100, color),
-		head:        NewCircleObject(shapeObject, x+50, y-25, 25, color),
-		hand1:       NewLineObject(shapeObject, x, y, x-50, y+50, color),
-		hand2:       NewLineObject(shapeObject, x+100, y, x+150, y+50, color),
-		leg1:        NewLineObject(shapeObject, x, y+100, x-50, y+250, color),
-		leg2:        NewLineObject(shapeObject, x+100, y+100, x+150, y+250, color),
+		spriteObject: spriteObject,
 	}
 }
-func (playerObject *playerObject) GetShapeObject() ShapeObject {
-	return playerObject.shapeObject
+func (playerObject *playerObject) GetSpriteObject() SpriteObject {
+	return playerObject.spriteObject
 }
-
-func (playerObject *playerObject) Draw() error {
-	playerObject.body.Draw()
-	playerObject.head.Draw()
-	playerObject.leg1.Draw()
-	playerObject.leg2.Draw()
-	playerObject.hand1.Draw()
-	playerObject.hand2.Draw()
-	playerObject.shapeObject.GetDrawableObject().Draw()
+func (playerObject *playerObject) LoadHero(folderPath string) error {
+	err := playerObject.spriteObject.LoadBitmaps(folderPath, 0)
+	if err != nil {
+		return err
+	}
 	return nil
 }
-func (playerObject *playerObject) UnDraw() error {
-	playerObject.body.UnDraw()
-	playerObject.head.UnDraw()
-	playerObject.leg1.UnDraw()
-	playerObject.leg2.UnDraw()
-	playerObject.hand1.UnDraw()
-	playerObject.hand2.UnDraw()
-	playerObject.shapeObject.GetDrawableObject().UnDraw()
+func (playerObject *playerObject) SetRightMovement(rmv []int) error {
+	playerObject.rightMovement = rmv
 	return nil
 }
 
-func (playerObject *playerObject) Translate(x, y int) error {
-	playerObject.UnDraw()
-	playerObject.GetShapeObject().GetTransformableObject().Translate(x, y)
-	playerObject.Draw()
+func (playerObject *playerObject) SetLeftMovement(lmv []int) error {
+	playerObject.leftMovement = lmv
+	return nil
+}
+func (playerObject *playerObject) SetTopMovement(tmv []int) error {
+	playerObject.topMovement = tmv
+	return nil
+}
+func (playerObject *playerObject) SetDownMovement(dmv []int) error {
+	playerObject.downMovement = dmv
 	return nil
 }
 
-func (playerObject *playerObject) Scale(S int) error {
-	//playerObject.UnDraw()
-	//playerObject.GetShapeObject().GetTransformableObject().Scale(S)
-	//playerObject.Draw()
+func (playerObject *playerObject) SetAttack(att []int) error {
+	playerObject.attack = att
+	return nil
+}
+func (playerObject *playerObject) SetCalm(cal int) error {
+	playerObject.calm = cal
 	return nil
 }
 
-func (playerObject *playerObject) Rotate(angle int) error {
-	//playerObject.UnDraw()
-	//playerObject.GetShapeObject().GetTransformableObject().Rotate(angle)
-	//playerObject.Draw()
+func (playerObject *playerObject) Move(isRight, isLeft, isTop, isDown, isAttack bool, x, y int) error {
+
+	if !isAttack && !isDown && !isLeft && !isRight && !isTop {
+		err := playerObject.spriteObject.SetBitmap(playerObject.calm, 0)
+		playerObject.spriteObject.MoveObject(x, y, 0)
+
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	if isRight && !isDown && !isTop && !isLeft && !isAttack {
+		if !contains(playerObject.rightMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) {
+			err := playerObject.spriteObject.SetBitmap(playerObject.rightMovement[0], 0)
+			playerObject.spriteObject.MoveObject(x, y, 0)
+
+			if err != nil {
+				return err
+			}
+		} else {
+			if indexOf(playerObject.rightMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) < len(playerObject.rightMovement)-1 {
+				err := playerObject.spriteObject.SetBitmap(playerObject.rightMovement[indexOf(playerObject.rightMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame())+1], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := playerObject.spriteObject.SetBitmap(playerObject.rightMovement[0], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	if !isRight && isDown && !isTop && !isLeft && !isAttack {
+		if !contains(playerObject.downMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) {
+			err := playerObject.spriteObject.SetBitmap(playerObject.downMovement[0], 0)
+			playerObject.spriteObject.MoveObject(x, y, 0)
+			if err != nil {
+				return err
+			}
+		} else {
+			if indexOf(playerObject.downMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) < len(playerObject.downMovement)-1 {
+				err := playerObject.spriteObject.SetBitmap(playerObject.downMovement[indexOf(playerObject.downMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame())+1], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := playerObject.spriteObject.SetBitmap(playerObject.downMovement[0], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	if !isRight && !isDown && isTop && !isLeft && !isAttack {
+		if !contains(playerObject.topMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) {
+			err := playerObject.spriteObject.SetBitmap(playerObject.topMovement[0], 0)
+			playerObject.spriteObject.MoveObject(x, y, 0)
+			if err != nil {
+				return err
+			}
+		} else {
+			if indexOf(playerObject.topMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) < len(playerObject.topMovement)-1 {
+
+				err := playerObject.spriteObject.SetBitmap(playerObject.topMovement[indexOf(playerObject.topMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame())+1], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := playerObject.spriteObject.SetBitmap(playerObject.topMovement[0], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	if !isRight && !isDown && !isTop && isLeft && !isAttack {
+		if !contains(playerObject.leftMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) {
+			err := playerObject.spriteObject.SetBitmap(playerObject.leftMovement[0], 0)
+			playerObject.spriteObject.MoveObject(x, y, 0)
+			if err != nil {
+				return err
+			}
+		} else {
+			if indexOf(playerObject.leftMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame()) < len(playerObject.leftMovement)-1 {
+				err := playerObject.spriteObject.SetBitmap(playerObject.leftMovement[indexOf(playerObject.leftMovement, playerObject.spriteObject.GetAnimatedObject().GetCurrentFrame())+1], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := playerObject.spriteObject.SetBitmap(playerObject.leftMovement[0], 0)
+				playerObject.spriteObject.MoveObject(x, y, 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	err := playerObject.spriteObject.SetBitmap(playerObject.calm, 0)
+	playerObject.spriteObject.MoveObject(x, y, 0)
+	if err != nil {
+		return err
+	}
 	return nil
+
 }

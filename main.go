@@ -1,3 +1,4 @@
+// Package main store the realisation of game
 package main
 
 import (
@@ -93,12 +94,8 @@ func (g *Game) Update() error {
 			g.translationSpeed = g.translationSpeed - 1
 		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyX) {
-		if g.translationSpeed <= 1 {
-			g.translationSpeed = 1
-		} else {
-			g.translationSpeed = g.translationSpeed - 1
-		}
+	if ebiten.IsKeyPressed(ebiten.KeyZ) {
+		g.translationSpeed = g.translationSpeed + 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) {
@@ -156,40 +153,40 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
 	col := color.RGBA{150, 100, 200, 255}
 	//Test full layer of constructors
-	/*
-		gmOb := objects.NewGameObject(screen, g.backgroundColor)
-		drawOb := objects.NewDrawableObject(gmOb)
-		tranOb := objects.NewTransformableObject(gmOb)
-		shapOb := objects.NewShapeObject(drawOb, tranOb)
 
-		squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
-		squaOb1.Draw()
-		squaOb1.Scale(2)
-		squaOb1.Rotate(-30)
-		squaOb1.Translate(200, 200)
-		squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
-		squaOb2.Draw()
-		squaOb2.Rotate(g.angle)
-		squaOb2.Scale(2)
-		squaOb2.Translate(100, 100)
+	gmOb := objects.NewGameObject(screen, g.backgroundColor)
+	drawOb := objects.NewDrawableObject(gmOb)
+	tranOb := objects.NewTransformableObject(gmOb)
+	shapOb := objects.NewShapeObject(drawOb, tranOb)
 
-		lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
+	squaOb1.Draw()
+	squaOb1.Scale(2)
+	squaOb1.Rotate(-30)
+	squaOb1.Translate(200, 200)
+	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
+	squaOb2.Draw()
+	squaOb2.Rotate(g.angle)
+	squaOb2.Scale(2)
+	squaOb2.Translate(100, 100)
 
-		lineOb1.Draw()
-		lineOb1.Translate(-300, -400)
-		lineOb1.Scale(4)
+	lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
 
-		lineOb1.Rotate(g.angle)
-		lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
-		lineOb2.Draw()
-		lineOb2.Translate(-400, -300)
-		lineOb2.Scale(4)
+	lineOb1.Draw()
+	lineOb1.Translate(-300, -400)
+	lineOb1.Scale(4)
 
-		circOb1 := objects.EnhancedNewCircleObject(screen, g.backgroundColor, 100, 600, 40, col)
-		circOb1.Draw()
-		circOb1.Scale(2)
-		circOb1.Translate(0, -200)
-	*/
+	lineOb1.Rotate(g.angle)
+	lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	lineOb2.Draw()
+	lineOb2.Translate(-400, -300)
+	lineOb2.Scale(4)
+
+	circOb1 := objects.EnhancedNewCircleObject(screen, g.backgroundColor, 100, 600, 40, col)
+	circOb1.Draw()
+	circOb1.Scale(2)
+	circOb1.Translate(0, -200)
+
 	x, y := 100, 100
 	player := objects.NewPlayerObject(screen, g.backgroundColor, col, x+g.xTranslate, y+g.yTranslate)
 	err := player.LoadHero("Movement")

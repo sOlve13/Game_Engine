@@ -6,15 +6,16 @@ import (
 	"flag"
 	"fmt"
 	"image/color"
-	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Variable which stores error logger
 var errorLogger *log.Logger
 
+// Itialisation of error logger
 func init() {
 	f, err := os.OpenFile("error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
@@ -23,6 +24,7 @@ func init() {
 	errorLogger = log.New(f, "", log.LstdFlags)
 }
 
+// Struct which holds crusial for engine objects
 type Game struct {
 	buttonImage                              *ebiten.Image
 	backgroundColor                          color.Color
@@ -34,6 +36,8 @@ type Game struct {
 	isRight, isLeft, isTop, isDown, isAttack bool
 }
 
+// Initalisation of Game with
+// @param screenWidth, screenHeight int: which supply information about size of screen
 func NewGame(screenWidth, screenHeight int) *Game {
 	buttonImage := ebiten.NewImage(200, 100)
 	buttonImage.Fill(color.RGBA{220, 220, 220, 255})
@@ -54,6 +58,8 @@ func NewGame(screenWidth, screenHeight int) *Game {
 	}
 }
 
+// Function for setting background color
+// @param R int, G int, B int, A int: colors
 func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 	if R < 0 || R > 255 || G < 0 || G > 255 || B < 0 || B > 255 || A < 0 || A > 255 {
 		logError(fmt.Errorf("Colors must be in the range of 0 to 255"))
@@ -61,6 +67,7 @@ func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 	g.backgroundColor = color.RGBA{uint8(R), uint8(G), uint8(B), uint8(A)}
 }
 
+// Function which is beeing runned every tick to update information about game
 func (g *Game) Update() error {
 
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
@@ -105,47 +112,48 @@ func (g *Game) Update() error {
 
 		g.angle = g.angle + 1
 	}
+	/*
+		IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+		screenWidth, screenHeight := ebiten.WindowSize()
 
-	IsCurPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
-	screenWidth, screenHeight := ebiten.WindowSize()
+			buttonWidth := g.buttonImage.Bounds().Dx()
+			buttonHeight := g.buttonImage.Bounds().Dy()
 
-	buttonWidth := g.buttonImage.Bounds().Dx()
-	buttonHeight := g.buttonImage.Bounds().Dy()
+			X := screenWidth / 2
+			Y := screenHeight / 2
 
-	X := screenWidth / 2
-	Y := screenHeight / 2
+			buttonLeft := X - buttonWidth/2
+			buttonRight := X + buttonWidth/2
+			buttonTop := Y - buttonHeight/2
+			buttonBottom := Y + buttonHeight/2
 
-	buttonLeft := X - buttonWidth/2
-	buttonRight := X + buttonWidth/2
-	buttonTop := Y - buttonHeight/2
-	buttonBottom := Y + buttonHeight/2
-
-	if IsCurPressed && !g.IsPressed {
-		x, y := ebiten.CursorPosition()
-		if x >= buttonLeft && x <= buttonRight && y >= buttonTop && y <= buttonBottom {
-			g.buttonImage.Fill(color.RGBA{128, 128, 128, 255})
-			fmt.Println("Button Test")
-			switch g.backgroundColor {
-			case color.Black:
-				g.setBackgroundColor(70, 70, 70, 100)
-			case color.RGBA{70, 70, 70, 100}:
-				g.setBackgroundColor(255, 255, 255, 255)
-			case color.RGBA{255, 255, 255, 255}:
-				g.setBackgroundColor(255, 0, 132, 100)
-			case color.RGBA{255, 0, 132, 100}:
-				g.setBackgroundColor(4, 0, 255, 100)
-			default:
-				g.backgroundColor = color.Black
+			if IsCurPressed && !g.IsPressed {
+				x, y := ebiten.CursorPosition()
+				if x >= buttonLeft && x <= buttonRight && y >= buttonTop && y <= buttonBottom {
+					g.buttonImage.Fill(color.RGBA{128, 128, 128, 255})
+					fmt.Println("Button Test")
+					switch g.backgroundColor {
+					case color.Black:
+						g.setBackgroundColor(70, 70, 70, 100)
+					case color.RGBA{70, 70, 70, 100}:
+						g.setBackgroundColor(255, 255, 255, 255)
+					case color.RGBA{255, 255, 255, 255}:
+						g.setBackgroundColor(255, 0, 132, 100)
+					case color.RGBA{255, 0, 132, 100}:
+						g.setBackgroundColor(4, 0, 255, 100)
+					default:
+						g.backgroundColor = color.Black
+					}
+				}
 			}
-		}
-	}
-	if !IsCurPressed && g.IsPressed {
-		g.buttonImage.Fill(color.RGBA{220, 220, 220, 255})
-	}
-	g.IsPressed = IsCurPressed
+			if !IsCurPressed && g.IsPressed {
+				g.buttonImage.Fill(color.RGBA{220, 220, 220, 255})
+			}
+			g.IsPressed = IsCurPressed*/
 	return nil
 }
 
+// Draw function draws everything on screen, which is given as paramiter
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebiten.SetWindowTitle("Game Engine")
 	screenWidth, screenHeight := ebiten.WindowSize()
@@ -190,14 +198,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	x, y := 100, 100
 	player := objects.NewPlayerObject(screen, g.backgroundColor, col, x+g.xTranslate, y+g.yTranslate)
 	err := player.LoadHero("Movement")
-	if err != nil {
-		logError(err)
-	}
-	filename := "player." + "txt"
-	data, _ := ioutil.ReadFile(filename)
-	current_f := string(data)
 
-	fmt.Println(current_f)
 	player.SetRightMovement(createRange(12, 17))
 	player.SetLeftMovement(createRange(6, 11))
 	player.SetTopMovement(createRange(0, 5))
@@ -294,14 +295,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	*/
 }
 
+// Function which return windowsize of game
 func (g *Game) Layout(int, int) (int, int) {
 	return ebiten.WindowSize()
 }
 
+// Function for logging errors
 func logError(err error) {
 	errorLogger.Println(err)
 }
 
+// Main function which create game and handle other functions so everything can work fine
 func main() {
 	tps := flag.Int("tps", 60, "Number of ticks per second (TPS)")
 	flag.Parse()
@@ -320,6 +324,7 @@ func main() {
 
 }
 
+// Help function for creating lists in range of given numbers
 func createRange(start, end int) []int {
 	var result []int
 	for i := start; i <= end; i++ {

@@ -7,6 +7,7 @@ import (
 )
 
 // GameObject represents an object in the game that can have a screen (image) and a background color.
+// This object is the basic object in class hierarchy.
 // It provides methods to get and set the screen and retrieve the background color.
 type GameObject interface {
 	// GetScreen returns the current screen (image) associated with the game object.

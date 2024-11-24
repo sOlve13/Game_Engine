@@ -1,5 +1,5 @@
 // Package main store the realisation of game
-package main
+package main_
 
 import (
 	"Game_Engine/objects"
@@ -59,6 +59,7 @@ func NewGame(screenWidth, screenHeight int) *Game {
 }
 
 // Function for setting background color
+// @param R int, G int, B int, A int: colors
 func (g *Game) setBackgroundColor(R int, G int, B int, A int) {
 	if R < 0 || R > 255 || G < 0 || G > 255 || B < 0 || B > 255 || A < 0 || A > 255 {
 		logError(fmt.Errorf("Colors must be in the range of 0 to 255"))
@@ -159,62 +160,77 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(screenWidth)/2-100, float64(screenHeight)/2-50)
 	col := color.RGBA{150, 100, 200, 255}
+	white := color.RGBA{255, 255, 255, 255} // White color with full opacity
+
 	//Test full layer of constructors
-	tumbler := false
-	if tumbler {
-		gmOb := objects.NewGameObject(screen, g.backgroundColor)
-		drawOb := objects.NewDrawableObject(gmOb)
-		tranOb := objects.NewTransformableObject(gmOb)
-		shapOb := objects.NewShapeObject(drawOb, tranOb)
 
-		squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
-		squaOb1.Draw()
-		squaOb1.Scale(2)
-		squaOb1.Rotate(-30)
-		squaOb1.Translate(200, 200)
-		squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
-		squaOb2.Draw()
-		squaOb2.Rotate(g.angle)
-		squaOb2.Scale(2)
-		squaOb2.Translate(100, 100)
+	testSegment := objects.NewLineSegment(screen, g.backgroundColor)
+	testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 0, 0, white), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, white), white)
+	//testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, white))
 
-		lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	gmOb := objects.NewGameObject(screen, g.backgroundColor)
+	drawOb := objects.NewDrawableObject(gmOb)
+	tranOb := objects.NewTransformableObject(gmOb)
+	shapOb := objects.NewShapeObject(drawOb, tranOb)
 
-		lineOb1.Draw()
-		lineOb1.Translate(-300, -400)
-		lineOb1.Scale(4)
+	squaOb1 := objects.NewSquareObject(shapOb, 100, 100, 100, col)
+	squaOb1.Draw()
+	squaOb1.Scale(2)
+	squaOb1.Rotate(-30)
+	squaOb1.Translate(200, 200)
+	squaOb2 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 100, 100, 100, col)
+	squaOb2.Draw()
+	squaOb2.Rotate(g.angle)
+	squaOb2.Scale(2)
+	squaOb2.Translate(100, 100)
 
-		lineOb1.Rotate(g.angle)
-		lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
-		lineOb2.Draw()
-		lineOb2.Translate(-400, -300)
-		lineOb2.Scale(4)
+	squaOb3 := objects.EnhancedNewSquareObject(screen, g.backgroundColor, 500, 500, 100, white)
+	squaOb3.Draw()
+	squaOb3.Rotate(g.angle)
+	squaOb3.Scale(2)
+	squaOb3.Translate(100, 100)
 
-		circOb1 := objects.EnhancedNewCircleObject(screen, g.backgroundColor, 100, 600, 40, col)
-		circOb1.Draw()
-		circOb1.Scale(2)
-		circOb1.Translate(0, -200)
+	lineOb1 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
 
-		x, y := 100, 100
-		player := objects.NewPlayerObject(screen, g.backgroundColor, col, x+g.xTranslate, y+g.yTranslate)
-		err := player.LoadHero("Movement")
+	lineOb1.Draw()
+	lineOb1.Translate(-300, -400)
+	lineOb1.Scale(4)
 
-		player.SetRightMovement(createRange(12, 17))
-		player.SetLeftMovement(createRange(6, 11))
-		player.SetTopMovement(createRange(0, 5))
-		player.SetDownMovement(createRange(18, 23))
-		player.SetCalm(18)
-		err = player.Move(g.isRight, g.isLeft, g.isTop, g.isDown, g.isAttack, g.xTranslate, g.yTranslate)
-		if err != nil {
-			logError(err)
-		}
+	lineOb1.Rotate(g.angle)
+	lineOb2 := objects.EnhancedNewLineObject(screen, g.backgroundColor, 500, 500, 600, 600, col)
+	lineOb2.Draw()
+	lineOb2.Translate(-400, -300)
+	lineOb2.Scale(4)
 
-	} else {
+	circOb1 := objects.EnhancedNewCircleObject(screen, g.backgroundColor, 100, 600, 40, col)
+	circOb1.Draw()
+	circOb1.Scale(2)
+	circOb1.Translate(0, -200)
 
+	x, y := 100, 100
+
+	player := objects.NewPlayerObject(screen, g.backgroundColor, col, x+g.xTranslate, y+g.yTranslate)
+	err := player.LoadHero("Movement")
+
+	player.SetRightMovement(createRange(12, 17))
+	player.SetLeftMovement(createRange(6, 11))
+	player.SetTopMovement(createRange(0, 5))
+	player.SetDownMovement(createRange(18, 23))
+	player.SetCalm(18)
+	err = player.Move(g.isRight, g.isLeft, g.isTop, g.isDown, g.isAttack, g.xTranslate, g.yTranslate)
+	if err != nil {
+		logError(err)
+	}
+
+	if err != nil {
+		logError(err)
+	}
+	/*
+		col = color.RGBA{150, 100, 200, 255} // Setting the color of segment/square
 		col2 := color.RGBA{50, 100, 200, 255}
 		testSegment := objects.NewLineSegment(screen, g.backgroundColor)
-		testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 200, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, col), col)
-		testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col))
+		testSegment.Segment(objects.NewPoint2D(screen, g.backgroundColor, 0, 0, white), objects.NewPoint2D(screen, g.backgroundColor, 200, 300, white), white)
+		testSegment.ChangeStart(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col2))
 
 		testSegmentDefault := objects.NewLineSegment(screen, g.backgroundColor)
 		testSegmentDefault.Segment(objects.NewPoint2D(screen, g.backgroundColor, 300, 100, col), objects.NewPoint2D(screen, g.backgroundColor, 300, 300, col), col)
@@ -251,7 +267,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		testPolygon := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
-		err := testPolygon.DrawPolygon(points2, col2)
+		err = testPolygon.DrawPolygon(points2, col2)
 		logError(err)
 		testCircle := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 		centerCircle := objects.NewPoint2D(screen, g.backgroundColor, 100, 100, col)
@@ -268,7 +284,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		testFloodFill := objects.NewPrimitiveRendererclass(screen, g.backgroundColor)
 		testFloodFill.FloodFill(951, 201, col, g.backgroundColor)
-	}
+	*/
 }
 
 // Function which return windowsize of game

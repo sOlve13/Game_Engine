@@ -1,3 +1,4 @@
+// Package objects store all objects of the game
 package objects
 
 import (
@@ -25,7 +26,7 @@ type AnimatedObject interface {
 	GetCurrentFrame() int
 }
 
-// animatedObject is an internal implementation of the AnimatedObject interface.
+// AnimatedObject is an internal implementation of the AnimatedObject interface.
 // It contains a reference to a game object, the number of frames in the animation,
 // the current frame of the animation, and the name used to store animation data.
 type animatedObject struct {
